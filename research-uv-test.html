@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>AETHER UV Test</title>
+
+    <script src="/baremux/index.js"></script>
+    <script src="/uv-test/uv.bundle.js"></script>
+    <script src="/uv-test.config.js"></script>
+    <script src="/register-sw.js"></script>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #121212;
+            font-family: "Courier New", Courier, monospace;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-bar {
+            display: flex;
+            background-color: #1a1a1a;
+            padding: 10px 10px 0 10px;
+            border-bottom: 4px solid #ffffff;
+            gap: 5px;
+            z-index: 50;
+        }
+
+        .tab {
+            background-color: #000000;
+            color: #ffffff;
+            border: 4px solid #ffffff;
+            border-bottom: none;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 8px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: -4px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tab.active {
+            background-color: #121212;
+        }
+
+        .close-tab {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .new-tab-btn {
+            background-color: #000000;
+            color: #ffffff;
+            border: 4px solid #ffffff;
+            border-bottom: none;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: -4px;
+        }
+
+        .appleseed {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a1a1a;
+            border-radius: 20px;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ffffff;
+            z-index: 50;
+            min-width: 320px;
+            gap: 22px;
+        }
+
+        .homebutton {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .homebutton:hover {
+            transform: scale(1.15);
+            opacity: 0.8;
+        }
+
+        .home-icon {
+            position: relative;
+            display: block;
+            width: 38px;
+            height: 34px;
+        }
+
+        .home-icon::before {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 12px;
+            width: 30px;
+            height: 22px;
+            background: #ffffff;
+            clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 63% 100%, 63% 54%, 37% 54%, 37% 100%, 0 100%);
+        }
+
+        .home-icon::after {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 0;
+            width: 34px;
+            height: 28px;
+            background: #ffffff;
+            clip-path: polygon(50% 0, 100% 58%, 90% 68%, 50% 24%, 10% 68%, 0 58%);
+        }
+
+        .home-chimney {
+            position: absolute;
+            right: 5px;
+            top: 3px;
+            width: 8px;
+            height: 15px;
+            background: #ffffff;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .nav-action {
+            width: 56px;
+            height: 52px;
+            padding: 0;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-action:hover {
+            transform: scale(1.12);
+            opacity: 0.8;
+        }
+
+        .controller-svg {
+            width: 58px;
+            height: 42px;
+            display: block;
+        }
+
+        .controller-icon {
+            position: relative;
+            width: 50px;
+            height: 29px;
+            border: 3px solid #ffffff;
+            border-radius: 20px 20px 14px 14px;
+            box-sizing: border-box;
+            transform: translateX(0);
+        }
+
+        .controller-icon::before,
+        .controller-icon::after {
+            content: "";
+            position: absolute;
+            top: 12px;
+            width: 13px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-top: 0;
+            background: black;
+            box-sizing: border-box;
+        }
+
+        .controller-icon::before {
+            left: -9px;
+            border-radius: 0 0 13px 13px;
+            transform: rotate(15deg);
+        }
+
+        .controller-icon::after {
+            right: -9px;
+            border-radius: 0 0 13px 13px;
+            transform: rotate(-15deg);
+        }
+
+        .controller-bumper {
+            position: absolute;
+            top: -8px;
+            width: 16px;
+            height: 9px;
+            border: 3px solid #ffffff;
+            border-bottom: 0;
+            border-radius: 12px 12px 0 0;
+            background: black;
+            box-sizing: border-box;
+        }
+
+        .controller-bumper.left {
+            left: 5px;
+            transform: rotate(-10deg);
+        }
+
+        .controller-bumper.right {
+            right: 5px;
+            transform: rotate(10deg);
+        }
+
+        .controller-stick,
+        .controller-button,
+        .controller-dot {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
+        .controller-stick {
+            left: 7px;
+            top: 8px;
+            width: 7px;
+            height: 7px;
+        }
+
+        .controller-button {
+            right: 10px;
+            top: 15px;
+            width: 7px;
+            height: 7px;
+        }
+
+        .controller-dot.one {
+            right: 13px;
+            top: 7px;
+            width: 4px;
+            height: 4px;
+        }
+
+        .controller-dot.two {
+            right: 7px;
+            top: 12px;
+            width: 4px;
+            height: 4px;
+        }
+
+        .controller-plus {
+            position: absolute;
+            left: 19px;
+            top: 15px;
+            width: 10px;
+            height: 10px;
+        }
+
+        .controller-plus::before,
+        .controller-plus::after {
+            content: "";
+            position: absolute;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .controller-plus::before {
+            left: 0;
+            top: 4px;
+            width: 10px;
+            height: 3px;
+        }
+
+        .controller-plus::after {
+            left: 4px;
+            top: 0;
+            width: 3px;
+            height: 10px;
+        }
+
+        .controller-slot {
+            position: absolute;
+            top: 8px;
+            width: 5px;
+            height: 3px;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+
+        .controller-slot.left {
+            left: 20px;
+        }
+
+        .controller-slot.right {
+            left: 28px;
+        }
+
+        .apps-icon {
+            position: relative;
+            width: 34px;
+            height: 34px;
+        }
+
+        .apps-square {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 3px solid #ffffff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .apps-square.one {
+            left: 0;
+            top: 0;
+        }
+
+        .apps-square.two {
+            right: 0;
+            top: 0;
+        }
+
+        .apps-square.three {
+            left: 0;
+            bottom: 0;
+        }
+
+        .apps-plus {
+            position: absolute;
+            right: 1px;
+            bottom: 1px;
+            width: 14px;
+            height: 14px;
+        }
+
+        .apps-plus::before,
+        .apps-plus::after {
+            content: "";
+            position: absolute;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .apps-plus::before {
+            left: 0;
+            top: 5px;
+            width: 14px;
+            height: 4px;
+        }
+
+        .apps-plus::after {
+            left: 5px;
+            top: 0;
+            width: 4px;
+            height: 14px;
+        }
+
+        .main-workspace {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 650px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .research-logo {
+            font-size: 90px;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+            user-select: none;
+        }
+
+        #uv-form {
+            width: 100%;
+        }
+
+        #uv-address {
+            width: 100%;
+            background-color: black;
+            border: 4px solid white;
+            border-radius: 30px;
+            padding: 18px 25px;
+            box-sizing: border-box;
+            color: white;
+            font-size: 18px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .web-viewport {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: none;
+            z-index: 40;
+        }
+
+        .web-viewport.active {
+            display: block;
+        }
+
+        #uv-error {
+            color: #ff5f56;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .bubble-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            left: var(--start-x);
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            opacity: var(--max-opacity);
+            animation: floatUp var(--speed) linear infinite;
+            animation-delay: var(--delay);
+            background: var(--color);
+            box-shadow: 0 0 15px var(--color);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: var(--max-opacity);
+            }
+
+            100% {
+                transform: translateY(-110vh)
+                    translateX(var(--drift-x));
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="tab-bar" id="tab-bar">
+        <button class="new-tab-btn" id="new-tab-btn">+</button>
+    </div>
+
+    <nav class="appleseed" id="home-nav">
+        <button class="nav-action" onclick="window.location.href='enrichment.html'" title="Games" aria-label="Games">
+            <svg class="controller-svg" aria-hidden="true" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 20C17 22 13 33 9 49C8 55 18 58 22 51L30 37H66L74 51C78 58 88 55 87 49C83 33 79 22 72 20C62 17 34 17 24 20Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="31" cy="30" r="5" fill="white"/>
+                <circle cx="64" cy="30" r="4" fill="white"/>
+                <circle cx="73" cy="35" r="4" fill="white"/>
+                <path d="M40 42H52M46 36V48" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <path d="M44 27H49M57 27H62" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button
+            class="homebutton"
+            onclick="window.location.href='studyhub.html'"
+        >
+            <span class="home-icon" aria-hidden="true"><span class="home-chimney"></span></span>
+        </button>
+        <button class="nav-action" onclick="window.location.href='resources.html'" title="Apps" aria-label="Apps">
+            <span class="apps-icon" aria-hidden="true">
+                <span class="apps-square one"></span>
+                <span class="apps-square two"></span>
+                <span class="apps-square three"></span>
+                <span class="apps-plus"></span>
+            </span>
+        </button>
+    </nav>
+
+    <div class="main-workspace">
+
+        <div class="search-container" id="landing-ui">
+
+            <h1 class="research-logo">AETHER</h1>
+
+            <form id="uv-form" onsubmit="return false">
+                <input
+                    id="uv-address"
+                    type="text"
+                    placeholder="Search the web or type a URL..."
+                    autocomplete="off"
+                    autofocus
+                />
+            </form>
+
+            <div id="uv-error"></div>
+
+        </div>
+
+        <div
+            id="viewports-container"
+            style="
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                z-index: 40;
+            "
+        ></div>
+
+    </div>
+
+    <div class="bubble-container">
+
+        <div class="bubble"
+            style="
+                --start-x: 5%;
+                --drift-x: 40px;
+                --size: 14px;
+                --speed: 9s;
+                --delay: 0s;
+                --max-opacity: 0.6;
+                --color: #00b4d8;
+            ">
+        </div>
+
+        <div class="bubble"
+            style="
+                --start-x: 22%;
+                --drift-x: 50px;
+                --size: 16px;
+                --speed: 8s;
+                --delay: 1.5s;
+                --max-opacity: 0.7;
+                --color: #00f5d4;
+            ">
+        </div>
+
+        <div class="bubble"
+            style="
+                --start-x: 48%;
+                --drift-x: 25px;
+                --size: 18px;
+                --speed: 10s;
+                --delay: 2s;
+                --max-opacity: 0.6;
+                --color: #7209b7;
+            ">
+        </div>
+
+    </div>
+
+ 
+<script type="module">
+function initAetherResearch() {
+
+    const toolTargetKey = "aether-tool-target";
+    const form = document.getElementById("uv-form");
+    const address = document.getElementById("uv-address");
+    const landingUi = document.getElementById("landing-ui");
+    const errorEl = document.getElementById("uv-error");
+
+    const tabBar = document.getElementById("tab-bar");
+    const newTabBtn = document.getElementById("new-tab-btn");
+    const viewportsContainer = document.getElementById("viewports-container");
+    const homeNav = document.getElementById("home-nav");
+    const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+
+    let tabs = [];
+    let activeTabId = null;
+    let legacyWorkersChecked = false;
+    let wispProbePromise = null;
+    let ultravioletReadyPromise = null;
+
+    /* =========================
+        FORMAT URL
+    ========================= */
+    function formatUrl(input) {
+        let url = input.trim();
+        if (!url) return "";
+
+        if (/^https?:\/\//i.test(url)) return url;
+
+        if (url.includes(".") && !url.includes(" ")) {
+            return "https://" + url;
+        }
+
+        return "https://www.google.com/search?q=" +
+            encodeURIComponent(url);
+    }
+
+    /* =========================
+        TAB HELPERS
+    ========================= */
+    function getActiveTab() {
+        return tabs.find(t => t.id === activeTabId);
+    }
+
+    function render() {
+        const tab = getActiveTab();
+        const hasPage = !!tab?.hasLoadedUrl;
+
+        landingUi.style.display = hasPage ? "none" : "flex";
+        homeNav.style.display = hasPage ? "none" : "flex";
+
+        for (const t of tabs) {
+            const isActive = t.id === activeTabId;
+
+            t.tabEl.classList.toggle("active", isActive);
+
+            if (isActive && t.hasLoadedUrl) {
+                t.iframeEl.style.display = "block";
+                viewportsContainer.style.pointerEvents = "auto";
+            } else {
+                t.iframeEl.style.display = "none";
+            }
+        }
+    }
+
+    function setActive(id) {
+        activeTabId = id;
+        errorEl.textContent = "";
+        render();
+    }
+
+    /* =========================
+        CREATE TAB
+    ========================= */
+    function createTab() {
+        const id = Date.now().toString();
+
+        const tabEl = document.createElement("div");
+        tabEl.className = "tab";
+
+        tabEl.innerHTML = `
+            <span class="tab-title">New Tab</span>
+            <button class="close-tab">&times;</button>
+        `;
+
+        const iframeEl = document.createElement("iframe");
+        iframeEl.className = "web-viewport";
+        iframeEl.style.display = "none";
+        iframeEl.setAttribute("allow", "autoplay; fullscreen; gamepad; microphone; camera; clipboard-read; clipboard-write");
+
+        viewportsContainer.appendChild(iframeEl);
+        tabBar.insertBefore(tabEl, newTabBtn);
+
+        const tab = {
+            id,
+            tabEl,
+            iframeEl,
+            hasLoadedUrl: false,
+            currentUrl: ""
+        };
+
+        tabs.push(tab);
+
+        tabEl.addEventListener("click", (e) => {
+            if (e.target.classList.contains("close-tab")) {
+                e.stopPropagation();
+                closeTab(id);
+            } else {
+                setActive(id);
+            }
+        });
+
+        setActive(id);
+    }
+
+    /* =========================
+        CLOSE TAB
+    ========================= */
+    function closeTab(id) {
+        const index = tabs.findIndex(t => t.id === id);
+        if (index === -1) return;
+
+        tabs[index].tabEl.remove();
+        tabs[index].iframeEl.remove();
+        tabs.splice(index, 1);
+
+        if (!tabs.length) {
+            createTab();
+            return;
+        }
+
+        setActive(tabs[Math.max(0, index - 1)].id);
+    }
+
+    newTabBtn.addEventListener("click", createTab);
+    createTab();
+
+    /* =========================
+        AETHER ULTRAVIOLET SETUP
+    ========================= */
+    async function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function removeLegacyServiceWorkers() {
+        if (legacyWorkersChecked) return;
+        legacyWorkersChecked = true;
+        if (!navigator.serviceWorker?.getRegistrations) return;
+
+        const cleanupKey = "aether-uv-sw-cleaned";
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        let removedLegacyWorker = false;
+
+        for (const registration of registrations) {
+            const worker =
+                registration.active ||
+                registration.waiting ||
+                registration.installing;
+            const scriptUrl = worker?.scriptURL || "";
+
+            if (
+                scriptUrl &&
+                !scriptUrl.endsWith("/uv/sw.js") &&
+                !scriptUrl.endsWith("/uv-test/sw.js")
+            ) {
+                removedLegacyWorker = await registration.unregister() || removedLegacyWorker;
+            }
+        }
+
+        if (removedLegacyWorker && !sessionStorage.getItem(cleanupKey)) {
+            sessionStorage.setItem(cleanupKey, "true");
+            window.location.reload();
+            throw new Error("Reloading research engine.");
+        }
+    }
+
+    async function registerUltraviolet() {
+        if (typeof registerSW !== "function") {
+            throw new Error("Ultraviolet service worker helper did not load.");
+        }
+
+        await removeLegacyServiceWorkers();
+        await registerSW();
+        await navigator.serviceWorker.ready;
+    }
+
+    async function probeWisp() {
+        if (wispProbePromise) return wispProbePromise;
+
+        const wispUrl =
+            (location.protocol === "https:" ? "wss" : "ws") +
+            "://" +
+            location.host +
+            "/wisp/";
+
+        wispProbePromise = new Promise((resolve, reject) => {
+            const socket = new WebSocket(wispUrl);
+            const timeout = setTimeout(() => {
+                socket.close();
+                reject(new Error("Research relay did not respond."));
+            }, 900);
+
+            socket.addEventListener("open", () => {
+                clearTimeout(timeout);
+                socket.close();
+                resolve();
+            }, { once: true });
+
+            socket.addEventListener("error", () => {
+                clearTimeout(timeout);
+                reject(new Error("Research relay failed to connect."));
+            }, { once: true });
+        });
+
+        return wispProbePromise;
+    }
+
+    async function ensureTransport() {
+        if (!window.BareMux || !window.__uv$config) {
+            throw new Error("Ultraviolet runtime did not load.");
+        }
+
+        await probeWisp();
+
+        const wispUrl =
+            (location.protocol === "https:" ? "wss" : "ws") +
+            "://" +
+            location.host +
+            "/wisp/";
+
+        const transportPath = "/epoxy/index.mjs";
+        let currentTransport = null;
+
+        try {
+            currentTransport = await connection.getTransport();
+        } catch {
+            currentTransport = null;
+        }
+
+        if (currentTransport !== transportPath) {
+            await connection.setTransport(transportPath, [{ wisp: wispUrl }]);
+        }
+    }
+
+    async function prepareUltraviolet() {
+        if (ultravioletReadyPromise) return ultravioletReadyPromise;
+
+        ultravioletReadyPromise = prepareUltravioletOnce().catch((err) => {
+            ultravioletReadyPromise = null;
+            wispProbePromise = null;
+            throw err;
+        });
+
+        return ultravioletReadyPromise;
+    }
+
+    async function prepareUltravioletOnce() {
+        let lastError = null;
+
+        for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+                await registerUltraviolet();
+                await ensureTransport();
+                return;
+            } catch (err) {
+                lastError = err;
+                await wait(350 * (attempt + 1));
+            }
+        }
+
+        throw lastError;
+    }
+
+    prepareUltraviolet().catch(() => {});
+
+    async function loadAddress() {
+
+        const tab = getActiveTab();
+        if (!tab) return;
+
+        const input = address.value.trim();
+        if (!input) return;
+
+        const url = formatUrl(input);
+
+        try {
+            errorEl.textContent = "Loading...";
+
+            await prepareUltraviolet();
+
+            tab.iframeEl.onload = () => {
+                if (errorEl.textContent === "Loading...") {
+                    errorEl.textContent = "";
+                }
+            };
+            tab.iframeEl.onerror = () => {
+                if (errorEl.textContent === "Loading...") {
+                    errorEl.textContent = "Site blocked or failed to load.";
+                }
+            };
+
+            tab.iframeEl.src = __uv$config.prefix + __uv$config.encodeUrl(url);
+            tab.hasLoadedUrl = true;
+            tab.currentUrl = url;
+
+            const domain = url
+                .replace(/^https?:\/\/(www\.)?/, "")
+                .split("/")[0];
+
+            tab.tabEl.querySelector(".tab-title").textContent =
+                domain.substring(0, 16);
+
+            render();
+
+            setTimeout(() => {
+                if (errorEl.textContent === "Loading...") {
+                    errorEl.textContent = "";
+                }
+            }, 2500);
+
+        } catch (err) {
+            errorEl.textContent = "Error: " + err.message;
+        }
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await loadAddress();
+    });
+
+    const params = new URL(window.location.href).searchParams;
+    const goto = params.get("goto") || sessionStorage.getItem(toolTargetKey);
+    if (goto) {
+        sessionStorage.removeItem(toolTargetKey);
+        address.value = goto;
+        window.history.replaceState(null, "", window.location.pathname);
+        loadAddress();
+    }
+
+}
+
+if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", initAetherResearch);
+} else {
+    initAetherResearch();
+}
+</script>
+
+</body>
+</html>

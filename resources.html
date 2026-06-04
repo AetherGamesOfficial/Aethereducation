@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Tools</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #121212;
+            color: white;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .appleseed {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a1a1a;
+            border-radius: 20px;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ffffff;
+            z-index: 50;
+            min-width: 320px;
+            gap: 22px;
+        }
+
+        .homebutton {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .homebutton:hover {
+            transform: scale(1.15);
+            opacity: 0.8;
+        }
+
+        .home-icon {
+            position: relative;
+            display: block;
+            width: 38px;
+            height: 34px;
+        }
+
+        .home-icon::before {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 12px;
+            width: 30px;
+            height: 22px;
+            background: #ffffff;
+            clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 63% 100%, 63% 54%, 37% 54%, 37% 100%, 0 100%);
+        }
+
+        .home-icon::after {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 0;
+            width: 34px;
+            height: 28px;
+            background: #ffffff;
+            clip-path: polygon(50% 0, 100% 58%, 90% 68%, 50% 24%, 10% 68%, 0 58%);
+        }
+
+        .home-chimney {
+            position: absolute;
+            right: 5px;
+            top: 3px;
+            width: 8px;
+            height: 15px;
+            background: #ffffff;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .nav-action {
+            width: 56px;
+            height: 52px;
+            padding: 0;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-action:hover {
+            transform: scale(1.12);
+            opacity: 0.8;
+        }
+
+        .controller-svg {
+            width: 58px;
+            height: 42px;
+            display: block;
+        }
+
+        .controller-icon {
+            position: relative;
+            width: 50px;
+            height: 29px;
+            border: 3px solid #ffffff;
+            border-radius: 20px 20px 14px 14px;
+            box-sizing: border-box;
+            transform: translateX(0);
+        }
+
+        .controller-icon::before,
+        .controller-icon::after {
+            content: "";
+            position: absolute;
+            top: 12px;
+            width: 13px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-top: 0;
+            background: black;
+            box-sizing: border-box;
+        }
+
+        .controller-icon::before {
+            left: -9px;
+            border-radius: 0 0 13px 13px;
+            transform: rotate(15deg);
+        }
+
+        .controller-icon::after {
+            right: -9px;
+            border-radius: 0 0 13px 13px;
+            transform: rotate(-15deg);
+        }
+
+        .controller-bumper {
+            position: absolute;
+            top: -8px;
+            width: 16px;
+            height: 9px;
+            border: 3px solid #ffffff;
+            border-bottom: 0;
+            border-radius: 12px 12px 0 0;
+            background: black;
+            box-sizing: border-box;
+        }
+
+        .controller-bumper.left {
+            left: 5px;
+            transform: rotate(-10deg);
+        }
+
+        .controller-bumper.right {
+            right: 5px;
+            transform: rotate(10deg);
+        }
+
+        .controller-stick,
+        .controller-button,
+        .controller-dot {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
+        .controller-stick {
+            left: 7px;
+            top: 8px;
+            width: 7px;
+            height: 7px;
+        }
+
+        .controller-button {
+            right: 10px;
+            top: 15px;
+            width: 7px;
+            height: 7px;
+        }
+
+        .controller-dot.one {
+            right: 13px;
+            top: 7px;
+            width: 4px;
+            height: 4px;
+        }
+
+        .controller-dot.two {
+            right: 7px;
+            top: 12px;
+            width: 4px;
+            height: 4px;
+        }
+
+        .controller-plus {
+            position: absolute;
+            left: 19px;
+            top: 15px;
+            width: 10px;
+            height: 10px;
+        }
+
+        .controller-plus::before,
+        .controller-plus::after {
+            content: "";
+            position: absolute;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .controller-plus::before {
+            left: 0;
+            top: 4px;
+            width: 10px;
+            height: 3px;
+        }
+
+        .controller-plus::after {
+            left: 4px;
+            top: 0;
+            width: 3px;
+            height: 10px;
+        }
+
+        .controller-slot {
+            position: absolute;
+            top: 8px;
+            width: 5px;
+            height: 3px;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+
+        .controller-slot.left {
+            left: 20px;
+        }
+
+        .controller-slot.right {
+            left: 28px;
+        }
+
+        .apps-icon {
+            position: relative;
+            width: 34px;
+            height: 34px;
+        }
+
+        .apps-square {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 3px solid #ffffff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .apps-square.one {
+            left: 0;
+            top: 0;
+        }
+
+        .apps-square.two {
+            right: 0;
+            top: 0;
+        }
+
+        .apps-square.three {
+            left: 0;
+            bottom: 0;
+        }
+
+        .apps-plus {
+            position: absolute;
+            right: 1px;
+            bottom: 1px;
+            width: 14px;
+            height: 14px;
+        }
+
+        .apps-plus::before,
+        .apps-plus::after {
+            content: "";
+            position: absolute;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .apps-plus::before {
+            left: 0;
+            top: 5px;
+            width: 14px;
+            height: 4px;
+        }
+
+        .apps-plus::after {
+            left: 5px;
+            top: 0;
+            width: 4px;
+            height: 14px;
+        }
+
+        .tools-shell {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 34px;
+            padding: 100px 28px 28px;
+        }
+
+        .tools-title {
+            margin: 0;
+            color: #ffffff;
+            font-size: 90px;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            user-select: none;
+        }
+
+        .tool-tabs {
+            width: min(960px, 92vw);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 18px;
+        }
+
+        .tool-tab {
+            background-color: black;
+            border: 5px solid #ffffff;
+            border-radius: 20px;
+            padding: 20px 18px;
+            color: white;
+            font-family: inherit;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tool-tab:hover {
+            transform: scale(1.06);
+            background-color: #222;
+        }
+
+        .bubble-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            left: var(--start-x);
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            opacity: var(--max-opacity);
+            animation: floatUp var(--speed) linear infinite;
+            animation-delay: var(--delay);
+            background: var(--color);
+            box-shadow: 0 0 15px var(--color);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: var(--max-opacity);
+            }
+            50% {
+                opacity: calc(var(--max-opacity) * 1.5);
+            }
+            100% {
+                transform: translateY(-110vh) translateX(var(--drift-x));
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .tools-shell {
+                justify-content: flex-start;
+                padding: 105px 18px 18px;
+            }
+
+            .tools-title {
+                font-size: 48px;
+            }
+
+            .tool-tabs {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src="page-loader.js"></script>
+    <nav class="appleseed">
+        <button class="nav-action" onclick="window.location.href='enrichment.html'" title="Games" aria-label="Games">
+            <svg class="controller-svg" aria-hidden="true" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 20C17 22 13 33 9 49C8 55 18 58 22 51L30 37H66L74 51C78 58 88 55 87 49C83 33 79 22 72 20C62 17 34 17 24 20Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="31" cy="30" r="5" fill="white"/>
+                <circle cx="64" cy="30" r="4" fill="white"/>
+                <circle cx="73" cy="35" r="4" fill="white"/>
+                <path d="M40 42H52M46 36V48" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <path d="M44 27H49M57 27H62" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button class="homebutton" onclick="window.location.href='studyhub.html'" title="Home">
+            <span class="home-icon" aria-hidden="true"><span class="home-chimney"></span></span>
+        </button>
+        <button class="nav-action" onclick="window.location.href='resources.html'" title="Apps" aria-label="Apps">
+            <span class="apps-icon" aria-hidden="true">
+                <span class="apps-square one"></span>
+                <span class="apps-square two"></span>
+                <span class="apps-square three"></span>
+                <span class="apps-plus"></span>
+            </span>
+        </button>
+    </nav>
+
+    <main class="tools-shell">
+        <h1 class="tools-title">TOOLS</h1>
+        <div class="tool-tabs">
+            <button class="tool-tab" data-url="https://flixmomo.com">movies</button>
+            <button class="tool-tab" data-url="https://youtube.com">youtube</button>
+            <button class="tool-tab" data-url="https://tiktok.com">tiktok</button>
+            <button class="tool-tab" data-url="https://discord.com">discord</button>
+            <button class="tool-tab" data-url="https://instagram.com">instagram</button>
+            <button class="tool-tab" data-url="https://facebook.com">facebook</button>
+        </div>
+    </main>
+
+    <div class="bubble-container">
+        <div class="bubble" style="--start-x: 5%;  --drift-x: 40px;  --size: 14px; --speed: 9s;  --delay: 0s;   --max-opacity: 0.6; --color: #00b4d8;"></div>
+        <div class="bubble" style="--start-x: 12%; --drift-x: -30px; --size: 26px; --speed: 13s; --delay: 4s;   --max-opacity: 0.5; --color: #7209b7;"></div>
+        <div class="bubble" style="--start-x: 22%; --drift-x: 50px;  --size: 16px; --speed: 8s;  --delay: 1.5s; --max-opacity: 0.7; --color: #00f5d4;"></div>
+        <div class="bubble" style="--start-x: 35%; --drift-x: -45px; --size: 32px; --speed: 16s; --delay: 7s;   --max-opacity: 0.4; --color: #2ec4b6;"></div>
+        <div class="bubble" style="--start-x: 48%; --drift-x: 25px;  --size: 18px; --speed: 10s; --delay: 2s;   --max-opacity: 0.6; --color: #7209b7;"></div>
+        <div class="bubble" style="--start-x: 55%; --drift-x: -35px; --size: 12px; --speed: 7s;  --delay: 5.5s; --max-opacity: 0.5; --color: #00b4d8;"></div>
+        <div class="bubble" style="--start-x: 68%; --drift-x: 60px;  --size: 28px; --speed: 14s; --delay: 0.8s; --max-opacity: 0.6; --color: #00f5d4;"></div>
+        <div class="bubble" style="--start-x: 76%; --drift-x: -20px; --size: 15px; --speed: 9s;  --delay: 3.2s; --max-opacity: 0.7; --color: #2ec4b6;"></div>
+        <div class="bubble" style="--start-x: 85%; --drift-x: 45px;  --size: 22px; --speed: 11s; --delay: 6s;   --max-opacity: 0.5; --color: #7209b7;"></div>
+        <div class="bubble" style="--start-x: 93%; --drift-x: -40px; --size: 13px; --speed: 8s;  --delay: 1.8s; --max-opacity: 0.6; --color: #00b4d8;"></div>
+    </div>
+
+    <script>
+        const toolTargetKey = "aether-tool-target";
+
+        document.querySelectorAll(".tool-tab").forEach((button) => {
+            button.addEventListener("click", () => {
+                const url = button.dataset.url;
+                sessionStorage.setItem(toolTargetKey, url);
+                window.location.href = `research.html?goto=${encodeURIComponent(url)}`;
+            });
+        });
+    </script>
+</body>
+</html>

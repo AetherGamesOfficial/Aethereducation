@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activities</title>
+    <script src="https://cdn.jsdelivr.net/gh/luminsdk/script@latest/lumin.min.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #121212;
+            color: white;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .bubble-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            left: var(--start-x);
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            opacity: var(--max-opacity);
+            animation: floatUp var(--speed) linear infinite;
+            animation-delay: var(--delay);
+            background: var(--color);
+            box-shadow: 0 0 15px var(--color);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: var(--max-opacity);
+            }
+            50% {
+                opacity: calc(var(--max-opacity) * 1.5);
+            }
+            100% {
+                transform: translateY(-110vh) translateX(var(--drift-x));
+                opacity: 0;
+            }
+        }
+
+        .activities-shell {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            padding: 102px 28px 28px;
+            gap: 20px;
+        }
+
+        .activities-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .activities-title {
+            margin: 0;
+            color: #ffffff;
+            font-size: 42px;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .activity-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .activity-input,
+        .activity-select,
+        .activity-button {
+            background-color: black;
+            border: 4px solid white;
+            border-radius: 20px;
+            color: white;
+            font: inherit;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .activity-input {
+            width: min(560px, 62vw);
+            padding: 12px 18px;
+        }
+
+        .activity-select,
+        .activity-button {
+            padding: 12px 16px;
+            cursor: pointer;
+        }
+
+        .activity-button {
+            transition: all 0.2s ease;
+        }
+
+        .activity-button:hover {
+            transform: scale(1.05);
+            background-color: #222;
+        }
+
+        .status {
+            min-height: 20px;
+            color: #ffffff;
+            font-size: 14px;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+
+        .games-grid {
+            min-height: 0;
+            overflow: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            padding-right: 6px;
+        }
+
+        .game-card {
+            min-height: 190px;
+            background-color: black;
+            border: 4px solid white;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+        }
+
+        .game-card:hover {
+            transform: scale(1.03);
+            background-color: #222;
+        }
+
+        .game-card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            background: #111;
+        }
+
+        .game-card span {
+            padding: 10px;
+            font-size: 14px;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .appleseed {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a1a1a;
+            border-radius: 20px;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ffffff;
+            z-index: 50;
+            min-width: 320px;
+            gap: 22px;
+        }
+
+        .homebutton {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .homebutton:hover {
+            transform: scale(1.15);
+            opacity: 0.8;
+        }
+
+        .home-icon {
+            position: relative;
+            display: block;
+            width: 38px;
+            height: 34px;
+        }
+
+        .home-icon::before {
+            content: "";
+            position: absolute;
+            left: 4px;
+            top: 12px;
+            width: 30px;
+            height: 22px;
+            background: #ffffff;
+            clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 63% 100%, 63% 54%, 37% 54%, 37% 100%, 0 100%);
+        }
+
+        .home-icon::after {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 0;
+            width: 34px;
+            height: 28px;
+            background: #ffffff;
+            clip-path: polygon(50% 0, 100% 58%, 90% 68%, 50% 24%, 10% 68%, 0 58%);
+        }
+
+        .home-chimney {
+            position: absolute;
+            right: 5px;
+            top: 3px;
+            width: 8px;
+            height: 15px;
+            background: #ffffff;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .nav-action {
+            width: 56px;
+            height: 52px;
+            padding: 0;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-action:hover {
+            transform: scale(1.12);
+            opacity: 0.8;
+        }
+
+        .controller-svg {
+            width: 58px;
+            height: 42px;
+            display: block;
+        }
+
+        .controller-icon {
+            position: relative;
+            width: 50px;
+            height: 29px;
+            border: 3px solid #ffffff;
+            border-radius: 20px 20px 14px 14px;
+            box-sizing: border-box;
+            transform: translateX(0);
+        }
+
+        .controller-icon::before,
+        .controller-icon::after {
+            content: "";
+            position: absolute;
+            top: 12px;
+            width: 13px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-top: 0;
+            background: black;
+            box-sizing: border-box;
+        }
+
+        .controller-icon::before {
+            left: -9px;
+            border-radius: 0 0 13px 13px;
+            transform: rotate(15deg);
+        }
+
+        .controller-icon::after {
+            right: -9px;
+            border-radius: 0 0 13px 13px;
+            transform: rotate(-15deg);
+        }
+
+        .controller-bumper {
+            position: absolute;
+            top: -8px;
+            width: 16px;
+            height: 9px;
+            border: 3px solid #ffffff;
+            border-bottom: 0;
+            border-radius: 12px 12px 0 0;
+            background: black;
+            box-sizing: border-box;
+        }
+
+        .controller-bumper.left {
+            left: 5px;
+            transform: rotate(-10deg);
+        }
+
+        .controller-bumper.right {
+            right: 5px;
+            transform: rotate(10deg);
+        }
+
+        .controller-stick,
+        .controller-button,
+        .controller-dot {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
+        .controller-stick {
+            left: 7px;
+            top: 8px;
+            width: 7px;
+            height: 7px;
+        }
+
+        .controller-button {
+            right: 10px;
+            top: 15px;
+            width: 7px;
+            height: 7px;
+        }
+
+        .controller-dot.one {
+            right: 13px;
+            top: 7px;
+            width: 4px;
+            height: 4px;
+        }
+
+        .controller-dot.two {
+            right: 7px;
+            top: 12px;
+            width: 4px;
+            height: 4px;
+        }
+
+        .controller-plus {
+            position: absolute;
+            left: 19px;
+            top: 15px;
+            width: 10px;
+            height: 10px;
+        }
+
+        .controller-plus::before,
+        .controller-plus::after {
+            content: "";
+            position: absolute;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .controller-plus::before {
+            left: 0;
+            top: 4px;
+            width: 10px;
+            height: 3px;
+        }
+
+        .controller-plus::after {
+            left: 4px;
+            top: 0;
+            width: 3px;
+            height: 10px;
+        }
+
+        .controller-slot {
+            position: absolute;
+            top: 8px;
+            width: 5px;
+            height: 3px;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+
+        .controller-slot.left {
+            left: 20px;
+        }
+
+        .controller-slot.right {
+            left: 28px;
+        }
+
+        .apps-icon {
+            position: relative;
+            width: 34px;
+            height: 34px;
+        }
+
+        .apps-square {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 3px solid #ffffff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .apps-square.one {
+            left: 0;
+            top: 0;
+        }
+
+        .apps-square.two {
+            right: 0;
+            top: 0;
+        }
+
+        .apps-square.three {
+            left: 0;
+            bottom: 0;
+        }
+
+        .apps-plus {
+            position: absolute;
+            right: 1px;
+            bottom: 1px;
+            width: 14px;
+            height: 14px;
+        }
+
+        .apps-plus::before,
+        .apps-plus::after {
+            content: "";
+            position: absolute;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .apps-plus::before {
+            left: 0;
+            top: 5px;
+            width: 14px;
+            height: 4px;
+        }
+
+        .apps-plus::after {
+            left: 5px;
+            top: 0;
+            width: 4px;
+            height: 14px;
+        }
+
+        @media (max-width: 720px) {
+            .activities-shell {
+                padding: 96px 18px 18px;
+            }
+
+            .activities-header,
+            .activity-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .activity-input {
+                width: auto;
+            }
+
+            .activities-title {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src="page-loader.js"></script>
+
+    <nav class="appleseed">
+        <button class="nav-action" onclick="window.location.href='enrichment.html'" title="Games" aria-label="Games">
+            <svg class="controller-svg" aria-hidden="true" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 20C17 22 13 33 9 49C8 55 18 58 22 51L30 37H66L74 51C78 58 88 55 87 49C83 33 79 22 72 20C62 17 34 17 24 20Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="31" cy="30" r="5" fill="white"/>
+                <circle cx="64" cy="30" r="4" fill="white"/>
+                <circle cx="73" cy="35" r="4" fill="white"/>
+                <path d="M40 42H52M46 36V48" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                <path d="M44 27H49M57 27H62" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button class="homebutton" onclick="window.location.href='studyhub.html'" title="Home">
+            <span class="home-icon" aria-hidden="true"><span class="home-chimney"></span></span>
+        </button>
+        <button class="nav-action" onclick="window.location.href='resources.html'" title="Apps" aria-label="Apps">
+            <span class="apps-icon" aria-hidden="true">
+                <span class="apps-square one"></span>
+                <span class="apps-square two"></span>
+                <span class="apps-square three"></span>
+                <span class="apps-plus"></span>
+            </span>
+        </button>
+    </nav>
+
+    <div class="bubble-container">
+        <div class="bubble" style="--start-x: 5%;  --drift-x: 40px;  --size: 14px; --speed: 9s;  --delay: 0s;   --max-opacity: 0.6; --color: #00b4d8;"></div>
+        <div class="bubble" style="--start-x: 12%; --drift-x: -30px; --size: 26px; --speed: 13s; --delay: 4s;   --max-opacity: 0.5; --color: #7209b7;"></div>
+        <div class="bubble" style="--start-x: 22%; --drift-x: 50px;  --size: 16px; --speed: 8s;  --delay: 1.5s; --max-opacity: 0.7; --color: #00f5d4;"></div>
+        <div class="bubble" style="--start-x: 35%; --drift-x: -45px; --size: 32px; --speed: 16s; --delay: 7s;   --max-opacity: 0.4; --color: #2ec4b6;"></div>
+        <div class="bubble" style="--start-x: 48%; --drift-x: 25px;  --size: 18px; --speed: 10s; --delay: 2s;   --max-opacity: 0.6; --color: #7209b7;"></div>
+        <div class="bubble" style="--start-x: 55%; --drift-x: -35px; --size: 12px; --speed: 7s;  --delay: 5.5s; --max-opacity: 0.5; --color: #00b4d8;"></div>
+        <div class="bubble" style="--start-x: 68%; --drift-x: 60px;  --size: 28px; --speed: 14s; --delay: 0.8s; --max-opacity: 0.6; --color: #00f5d4;"></div>
+        <div class="bubble" style="--start-x: 76%; --drift-x: -20px; --size: 15px; --speed: 9s;  --delay: 3.2s; --max-opacity: 0.7; --color: #2ec4b6;"></div>
+        <div class="bubble" style="--start-x: 85%; --drift-x: 45px;  --size: 22px; --speed: 11s; --delay: 6s;   --max-opacity: 0.5; --color: #7209b7;"></div>
+        <div class="bubble" style="--start-x: 93%; --drift-x: -40px; --size: 13px; --speed: 8s;  --delay: 1.8s; --max-opacity: 0.6; --color: #00b4d8;"></div>
+    </div>
+
+    <main class="activities-shell">
+        <header class="activities-header">
+            <h1 class="activities-title">ACTIVITIES</h1>
+            <div class="activity-actions">
+                <input class="activity-input" id="game-search" type="text" placeholder="Search games..." autocomplete="off">
+                <select class="activity-select" id="category-filter">
+                    <option value="">All</option>
+                </select>
+                <button class="activity-button" id="random-games" type="button">Random</button>
+            </div>
+        </header>
+
+        <div class="status" id="status">Loading games...</div>
+        <section class="games-grid" id="games"></section>
+    </main>
+
+    <script>
+        const grid = document.getElementById("games");
+        const statusEl = document.getElementById("status");
+        const searchInput = document.getElementById("game-search");
+        const categoryFilter = document.getElementById("category-filter");
+        const randomButton = document.getElementById("random-games");
+
+        let allGames = [];
+        let imageUrls = {};
+        let usingFallbackGames = false;
+        let imageObserver = null;
+        let luminTotalPages = 1;
+        let luminTotalGames = 0;
+        const luminPageLimit = 200;
+        const luminDirectoryCacheKey = "aether:lumin-directory:v2";
+
+        const fallbackGames = [
+            { id: "play-2048", name: "2048", category: "Puzzle", url: "https://play2048.co/" },
+            { id: "tetris", name: "Tetris", category: "Puzzle", url: "https://tetris.com/play-tetris" },
+            { id: "little-alchemy-2", name: "Little Alchemy 2", category: "Puzzle", url: "https://littlealchemy2.com/" },
+            { id: "sudoku", name: "Sudoku", category: "Puzzle", url: "https://sudoku.com/" },
+            { id: "wordle", name: "Wordle", category: "Puzzle", url: "https://www.nytimes.com/games/wordle/index.html" },
+            { id: "connections", name: "Connections", category: "Puzzle", url: "https://www.nytimes.com/games/connections" },
+            { id: "minesweeper", name: "Minesweeper", category: "Puzzle", url: "https://minesweeper.online/" },
+            { id: "cut-the-rope", name: "Cut The Rope", category: "Puzzle", url: "https://www.crazygames.com/game/cut-the-rope" },
+            { id: "hextris", name: "Hextris", category: "Arcade", url: "https://hextris.io/" },
+            { id: "agar", name: "Agar.io", category: "Arcade", url: "https://agar.io/" },
+            { id: "paper-io", name: "Paper.io", category: "Arcade", url: "https://paper-io.com/" },
+            { id: "slither", name: "Slither.io", category: "Arcade", url: "https://slither.io/" },
+            { id: "shell-shockers", name: "Shell Shockers", category: "Arcade", url: "https://shellshock.io/" },
+            { id: "crossy-road", name: "Crossy Road", category: "Arcade", url: "https://poki.com/en/g/crossy-road" },
+            { id: "temple-run", name: "Temple Run 2", category: "Arcade", url: "https://poki.com/en/g/temple-run-2" },
+            { id: "subway-surfers", name: "Subway Surfers", category: "Arcade", url: "https://poki.com/en/g/subway-surfers" },
+            { id: "krunker", name: "Krunker", category: "Action", url: "https://krunker.io/" },
+            { id: "1v1-lol", name: "1v1.LOL", category: "Action", url: "https://1v1.lol/" },
+            { id: "zombs-royale", name: "Zombs Royale", category: "Action", url: "https://zombsroyale.io/" },
+            { id: "ev-io", name: "Ev.io", category: "Action", url: "https://ev.io/" },
+            { id: "venge", name: "Venge.io", category: "Action", url: "https://venge.io/" },
+            { id: "lolbeans", name: "Lolbeans", category: "Action", url: "https://lolbeans.io/" },
+            { id: "slow-roads", name: "Slow Roads", category: "Driving", url: "https://slowroads.io/" },
+            { id: "drift-boss", name: "Drift Boss", category: "Driving", url: "https://www.hoodamath.com/games/driftboss.html" },
+            { id: "moto-x3m", name: "Moto X3M", category: "Driving", url: "https://poki.com/en/g/moto-x3m" },
+            { id: "madalin-stunt", name: "Madalin Stunt Cars", category: "Driving", url: "https://www.crazygames.com/game/madalin-stunt-cars-2" },
+            { id: "basket-random", name: "Basket Random", category: "Sports", url: "https://www.twoplayergames.org/game/basket-random" },
+            { id: "soccer-random", name: "Soccer Random", category: "Sports", url: "https://www.twoplayergames.org/game/soccer-random" },
+            { id: "retro-bowl", name: "Retro Bowl", category: "Sports", url: "https://retrobowl.me/" },
+            { id: "basketball-stars", name: "Basketball Stars", category: "Sports", url: "https://poki.com/en/g/basketball-stars" },
+            { id: "lichess", name: "Lichess", category: "Strategy", url: "https://lichess.org/" },
+            { id: "chess", name: "Chess", category: "Strategy", url: "https://www.chess.com/play/computer" },
+            { id: "checkers", name: "Checkers", category: "Strategy", url: "https://cardgames.io/checkers/" },
+            { id: "bloons", name: "Bloons TD", category: "Strategy", url: "https://www.crazygames.com/game/bloons-tower-defense" },
+            { id: "sandspiel", name: "Sandspiel", category: "Creative", url: "https://sandspiel.club/" },
+            { id: "classic-minecraft", name: "Classic Minecraft", category: "Creative", url: "https://classic.minecraft.net/" },
+            { id: "townscaper", name: "Townscaper", category: "Creative", url: "https://oskarstalberg.com/Townscaper/" },
+            { id: "neal-fun", name: "Neal.fun", category: "Creative", url: "https://neal.fun/" },
+            { id: "quick-draw", name: "Quick Draw", category: "Creative", url: "https://quickdraw.withgoogle.com/" },
+            { id: "geoguessr", name: "GeoGuessr", category: "Trivia", url: "https://www.geoguessr.com/" },
+            { id: "seterra", name: "Seterra", category: "Trivia", url: "https://www.geoguessr.com/seterra/" },
+            { id: "freerice", name: "FreeRice", category: "Trivia", url: "https://freerice.com/" },
+        ];
+
+        function setStatus(message) {
+            statusEl.textContent = message;
+        }
+
+        function normalizeGames(result) {
+            if (Array.isArray(result)) return result;
+            return result?.games || [];
+        }
+
+        function withTimeout(promise, timeout, message) {
+            let timeoutId;
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error(message)), timeout);
+            });
+
+            return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+        }
+
+        function getCachedLuminDirectory() {
+            try {
+                const cached = sessionStorage.getItem(luminDirectoryCacheKey);
+                if (!cached) return null;
+                const parsed = JSON.parse(cached);
+                if (!parsed || !Array.isArray(parsed.games) || !parsed.games.length) return null;
+                return parsed;
+            } catch {
+                return null;
+            }
+        }
+
+        function setCachedLuminDirectory(games, total) {
+            try {
+                sessionStorage.setItem(luminDirectoryCacheKey, JSON.stringify({ games, total }));
+            } catch {}
+        }
+
+        async function retryLumin(operation, attempts = 4) {
+            let lastError = null;
+            for (let attempt = 1; attempt <= attempts; attempt++) {
+                try {
+                    return await operation();
+                } catch (err) {
+                    lastError = err;
+                    if (attempt === attempts) break;
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, 250 * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 200))
+                    );
+                }
+            }
+            throw lastError;
+        }
+
+        async function loadLuminSdk() {
+            if (window.Lumin) return;
+
+            await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdn.jsdelivr.net/gh/luminsdk/script@latest/lumin.min.js";
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = () => reject(new Error("Lumin SDK failed to load."));
+                document.head.appendChild(script);
+            });
+        }
+
+        async function getGamesPage(page) {
+            const result = await retryLumin(() => Lumin.getGames({ page, limit: luminPageLimit, q: "" }));
+            const games = normalizeGames(result);
+            const total = Number(result?.total || games.length);
+            const pages = Number(result?.pages || Math.ceil(total / luminPageLimit) || 1);
+            return { games, pages, total };
+        }
+
+        function updateCategories(categories) {
+            categoryFilter.innerHTML = '<option value="">All</option>';
+            for (const category of categories) {
+                const option = document.createElement("option");
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            }
+        }
+
+        function categoriesFromGames(games) {
+            return [...new Set(games.map((game) => game.category).filter(Boolean))].sort();
+        }
+
+        function mergeLuminGames(games) {
+            const seen = new Set(allGames.map((game) => game.id));
+            const freshGames = games.filter((game) => game?.id && !seen.has(game.id));
+            if (!freshGames.length) return false;
+
+            allGames = allGames.concat(freshGames);
+            return true;
+        }
+
+        async function loadRemainingLuminPages(startPage) {
+            for (let page = startPage; page <= luminTotalPages; page += 3) {
+                const batch = await Promise.all(
+                    Array.from({ length: Math.min(3, luminTotalPages - page + 1) }, (_, index) =>
+                        getGamesPage(page + index).catch(() => ({ games: [] }))
+                    )
+                );
+
+                const nextGames = batch.flatMap((result) => result.games);
+                if (!nextGames.length || !mergeLuminGames(nextGames)) continue;
+
+                const fetchedCount = luminTotalGames ? Math.min(allGames.length, luminTotalGames) : allGames.length;
+                updateCategories(categoriesFromGames(allGames));
+                setCachedLuminDirectory(allGames, luminTotalGames);
+                setStatus(luminTotalGames ? `Loading Lumin games: ${fetchedCount} of ${luminTotalGames}` : `Loading Lumin games: ${allGames.length}`);
+                refreshGames();
+                await new Promise((resolve) => setTimeout(resolve, 40));
+            }
+
+            setStatus(`${allGames.length} games`);
+        }
+
+        function normalizeCategories(result) {
+            if (Array.isArray(result)) return result;
+            return result?.categories || result?.data || [];
+        }
+
+        function getFallbackImage(game) {
+            const label = game.name
+                .slice(0, 18)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;");
+            const categoryName = game.category || "Games";
+            const category = categoryName
+                .toUpperCase()
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;");
+            const palette = {
+                Puzzle: ["#00f5d4", "#7209b7", "#00b4d8"],
+                Arcade: ["#ff006e", "#00b4d8", "#7209b7"],
+                Action: ["#f72585", "#ffbe0b", "#3a0ca3"],
+                Driving: ["#2ec4b6", "#00b4d8", "#111111"],
+                Sports: ["#80ed99", "#00b4d8", "#7209b7"],
+                Strategy: ["#4cc9f0", "#4361ee", "#111111"],
+                Creative: ["#00f5d4", "#2ec4b6", "#7209b7"],
+                Trivia: ["#fdd85d", "#00b4d8", "#7209b7"],
+            };
+            const colors = palette[categoryName] || ["#00b4d8", "#7209b7", "#00f5d4"];
+            const initials = game.name
+                .split(/[\s.-]+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((word) => word[0].toUpperCase())
+                .join("");
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+                    <defs>
+                        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#050505"/>
+                            <stop offset="1" stop-color="#151515"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="6" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect width="300" height="300" fill="url(#bg)"/>
+                    <rect x="18" y="18" width="264" height="264" rx="24" fill="none" stroke="white" stroke-width="8"/>
+                    <circle cx="76" cy="78" r="34" fill="${colors[0]}" opacity=".85" filter="url(#glow)"/>
+                    <circle cx="230" cy="224" r="42" fill="${colors[1]}" opacity=".82" filter="url(#glow)"/>
+                    <circle cx="222" cy="78" r="20" fill="${colors[2]}" opacity=".9" filter="url(#glow)"/>
+                    <text x="150" y="130" text-anchor="middle" fill="white" font-family="Courier New, monospace" font-size="62" font-weight="700" filter="url(#glow)">${initials}</text>
+                    <text x="150" y="190" text-anchor="middle" fill="white" font-family="Courier New, monospace" font-size="24" font-weight="700">${label}</text>
+                    <text x="150" y="226" text-anchor="middle" fill="${colors[0]}" font-family="Courier New, monospace" font-size="15" font-weight="700">${category}</text>
+                </svg>
+            `;
+
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        async function getLuminImageUrl(token) {
+            return retryLumin(() => Lumin.getImageUrl(token), 6);
+        }
+
+        async function loadImages(games) {
+            await Promise.all(games.map(async (game) => {
+                if (game.url && !game.image_token) {
+                    imageUrls[game.id] = getFallbackImage(game);
+                    return;
+                }
+
+                if (!game.image_token || imageUrls[game.id] || !window.Lumin) return;
+                try {
+                    imageUrls[game.id] = await getLuminImageUrl(game.image_token);
+                } catch {
+                    imageUrls[game.id] = "";
+                }
+            }));
+        }
+
+        function watchImage(image, game) {
+            if (!imageObserver) {
+                imageObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (!entry.isIntersecting) continue;
+
+                        const target = entry.target;
+                        imageObserver.unobserve(target);
+                        const gameId = target.dataset.gameId;
+                        const nextGame = allGames.find((item) => item.id === gameId);
+                        if (!nextGame) return;
+
+                        loadImages([nextGame]).then(() => {
+                            if (imageUrls[nextGame.id]) {
+                                target.src = imageUrls[nextGame.id];
+                            }
+                        });
+                    }
+                }, { root: grid, rootMargin: "260px" });
+            }
+
+            image.dataset.gameId = game.id;
+            imageObserver.observe(image);
+        }
+
+        function getVisibleGames() {
+            const query = searchInput.value.trim().toLowerCase();
+            const category = categoryFilter.value;
+
+            return allGames.filter((game) => {
+                const matchesSearch = !query || game.name.toLowerCase().includes(query);
+                const matchesCategory = !category || game.category === category;
+                return matchesSearch && matchesCategory;
+            });
+        }
+
+        function playGame(game) {
+            if (game.url) {
+                window.location.href = `research.html?goto=${encodeURIComponent(game.url)}`;
+                return;
+            }
+
+            Lumin.loadGame(game.id).catch(async () => {
+                try {
+                    const result = await Lumin.getGameUrl(game.id);
+                    const url = result?.url || result;
+                    if (url) {
+                        window.location.href = `research.html?goto=${encodeURIComponent(url)}`;
+                    }
+                } catch (err) {
+                    console.error("Game launch failed:", err);
+                    setStatus("Could not open game.");
+                }
+            });
+        }
+
+        function renderGames(games) {
+            grid.innerHTML = "";
+            imageObserver?.disconnect();
+            imageObserver = null;
+
+            if (!games.length) {
+                setStatus("No games found.");
+                return;
+            }
+
+            setStatus(luminTotalGames > games.length ? `${games.length} of ${luminTotalGames} games` : `${games.length} games`);
+
+            for (const game of games) {
+                const card = document.createElement("button");
+                card.className = "game-card";
+                card.type = "button";
+                card.onclick = () => playGame(game);
+
+                const image = document.createElement("img");
+                image.alt = game.name;
+                if (imageUrls[game.id]) {
+                    image.src = imageUrls[game.id];
+                } else if (!game.image_token) {
+                    image.src = getFallbackImage(game);
+                }
+                if (game.image_token && !imageUrls[game.id]) {
+                    watchImage(image, game);
+                }
+
+                const title = document.createElement("span");
+                title.textContent = game.name;
+
+                card.append(image, title);
+                grid.appendChild(card);
+            }
+        }
+
+        async function refreshGames() {
+            const games = getVisibleGames();
+            renderGames(games);
+        }
+
+        async function initActivities() {
+            const cachedDirectory = getCachedLuminDirectory();
+            if (cachedDirectory) {
+                allGames = cachedDirectory.games;
+                luminTotalGames = cachedDirectory.total || cachedDirectory.games.length;
+                updateCategories(categoriesFromGames(allGames));
+                refreshGames();
+            }
+
+            try {
+                setStatus(cachedDirectory ? `${allGames.length} games` : "Loading Lumin games...");
+                await withTimeout(loadLuminSdk(), 15000, "Lumin SDK took too long to load.");
+                await withTimeout(Lumin.init({ headless: true }), 30000, "Lumin took too long to start.");
+                const firstPage = await withTimeout(getGamesPage(1), 30000, "Lumin games took too long to load.");
+                allGames = firstPage.games;
+                if (!allGames.length) throw new Error("Lumin returned no games.");
+                usingFallbackGames = false;
+                luminTotalPages = firstPage.pages;
+                luminTotalGames = firstPage.total;
+                setCachedLuminDirectory(allGames, luminTotalGames);
+
+                let categories = normalizeCategories(await Lumin.getCategories().catch(() => []));
+                if (!categories.length) {
+                    categories = categoriesFromGames(allGames);
+                }
+
+                updateCategories(categories);
+                await loadImages(allGames.slice(0, 24));
+                refreshGames();
+                loadRemainingLuminPages(2).catch((err) => {
+                    console.error("More Lumin pages failed:", err);
+                    setStatus(`${allGames.length} games loaded. More pages failed.`);
+                });
+                return;
+            } catch (err) {
+                console.error("LuminSDK error:", err);
+                if (cachedDirectory) {
+                    setStatus(`${allGames.length} cached Lumin games`);
+                    return;
+                }
+                usingFallbackGames = false;
+                allGames = [];
+                luminTotalGames = 0;
+                updateCategories([]);
+                grid.innerHTML = "";
+                setStatus("Lumin games failed to load.");
+            }
+        }
+
+        searchInput.addEventListener("input", refreshGames);
+        categoryFilter.addEventListener("change", refreshGames);
+        randomButton.addEventListener("click", async () => {
+            setStatus("Loading random games...");
+
+            if (!allGames.length && !window.Lumin) {
+                setStatus("Lumin games failed to load.");
+                return;
+            }
+
+            if (usingFallbackGames || !window.Lumin) {
+                const shuffled = [...allGames].sort(() => Math.random() - 0.5).slice(0, 20);
+                await loadImages(shuffled);
+                renderGames(shuffled);
+                return;
+            }
+
+            try {
+                const result = await Lumin.getRandomGames(20);
+                const games = normalizeGames(result);
+                await loadImages(games);
+                renderGames(games);
+            } catch (err) {
+                console.error("Random games failed:", err);
+                usingFallbackGames = true;
+                allGames = fallbackGames;
+                const shuffled = [...allGames].sort(() => Math.random() - 0.5).slice(0, 20);
+                await loadImages(shuffled);
+                renderGames(shuffled);
+            }
+        });
+
+        window.addEventListener("beforeunload", () => {
+            window.Lumin?.destroy?.();
+        });
+
+        initActivities();
+    </script>
+
+</body>
+</html>

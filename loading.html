@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    margin: 0;
+    background: black;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+.bubble-container {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bubble {
+    position: absolute;
+    bottom: -50px;
+    left: var(--start-x);
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    opacity: var(--max-opacity);
+    animation: floatUp var(--speed) linear infinite;
+    animation-delay: var(--delay);
+    background: var(--color);
+    box-shadow: 0 0 15px var(--color);
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: var(--max-opacity);
+    }
+    50% {
+        opacity: calc(var(--max-opacity) * 1.5);
+    }
+    100% {
+        transform: translateY(-110vh) translateX(var(--drift-x));
+        opacity: 0;
+    }
+}
+
+.loader {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 40px;
+    z-index: 1;
+}
+
+.dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+
+    background: white;
+    border-radius: 50%;
+
+    top: 50%;
+    left: 50%;
+
+    margin: -6px;
+
+    animation: orbit 1.2s linear infinite;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; opacity: 1; }
+.dot:nth-child(2) { animation-delay: -0.1s; opacity: .92; }
+.dot:nth-child(3) { animation-delay: -0.2s; opacity: .84; }
+.dot:nth-child(4) { animation-delay: -0.3s; opacity: .76; }
+.dot:nth-child(5) { animation-delay: -0.4s; opacity: .68; }
+.dot:nth-child(6) { animation-delay: -0.5s; opacity: .60; }
+.dot:nth-child(7) { animation-delay: -0.6s; opacity: .52; }
+.dot:nth-child(8) { animation-delay: -0.7s; opacity: .44; }
+.dot:nth-child(9) { animation-delay: -0.8s; opacity: .36; }
+.dot:nth-child(10){ animation-delay: -0.9s; opacity: .28; }
+.dot:nth-child(11){ animation-delay: -1.0s; opacity: .20; }
+.dot:nth-child(12){ animation-delay: -1.1s; opacity: .12; }
+
+@keyframes orbit {
+    from {
+        transform: rotate(0deg) translateX(40px);
+    }
+    to {
+        transform: rotate(360deg) translateX(40px);
+    }
+}
+
+#message {
+    color: white;
+    font-size: 32px;
+    font-family: "Courier New", monospace;
+    text-align: center;
+    max-width: 80%;
+    z-index: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="bubble-container">
+    <div class="bubble" style="--start-x: 5%;  --drift-x: 40px;  --size: 14px; --speed: 9s;  --delay: 0s;   --max-opacity: 0.6; --color: #00b4d8;"></div>
+    <div class="bubble" style="--start-x: 12%; --drift-x: -30px; --size: 26px; --speed: 13s; --delay: 4s;   --max-opacity: 0.5; --color: #7209b7;"></div>
+    <div class="bubble" style="--start-x: 22%; --drift-x: 50px;  --size: 16px; --speed: 8s;  --delay: 1.5s; --max-opacity: 0.7; --color: #00f5d4;"></div>
+    <div class="bubble" style="--start-x: 35%; --drift-x: -45px; --size: 32px; --speed: 16s; --delay: 7s;   --max-opacity: 0.4; --color: #2ec4b6;"></div>
+    <div class="bubble" style="--start-x: 48%; --drift-x: 25px;  --size: 18px; --speed: 10s; --delay: 2s;   --max-opacity: 0.6; --color: #7209b7;"></div>
+    <div class="bubble" style="--start-x: 55%; --drift-x: -35px; --size: 12px; --speed: 7s;  --delay: 5.5s; --max-opacity: 0.5; --color: #00b4d8;"></div>
+    <div class="bubble" style="--start-x: 68%; --drift-x: 60px;  --size: 28px; --speed: 14s; --delay: 0.8s; --max-opacity: 0.6; --color: #00f5d4;"></div>
+    <div class="bubble" style="--start-x: 76%; --drift-x: -20px; --size: 15px; --speed: 9s;  --delay: 3.2s; --max-opacity: 0.7; --color: #2ec4b6;"></div>
+    <div class="bubble" style="--start-x: 85%; --drift-x: 45px;  --size: 22px; --speed: 11s; --delay: 6s;   --max-opacity: 0.5; --color: #7209b7;"></div>
+    <div class="bubble" style="--start-x: 93%; --drift-x: -40px; --size: 13px; --speed: 8s;  --delay: 1.8s; --max-opacity: 0.6; --color: #00b4d8;"></div>
+</div>
+
+<div class="loader">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+</div>
+
+<p id="message"></p>
+
+<script>
+const messages = [
+    "Horty is a gooner",
+    "i like coffee",
+    "Fuck you izzy",
+    "My school gonna flame on me for ts",
+    "Aether on top am i right?",
+    "#MyToeZ_rbig",
+    "Bunny termed my acc AGAIN",
+    "I'm watching youuuuu",
+    "is it just me but english teachers and math teachers are HELLA yappers",
+    "hear me out but golden is lwk peak",
+    "you found this message, wooooow",
+    "appleseed",
+    "rotoga",
+    "rocola"
+];
+
+document.getElementById("message").textContent =
+    messages[Math.floor(Math.random() * messages.length)];
+</script>
+
+</body>
+</html>
