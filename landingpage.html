@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riverside View Learning Portal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: #f7fbff;
+            color: #17324d;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .top-strip {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 10px 18px;
+            background: #0b5d7a;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid #d8e7ef;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-shell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 18px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 230px;
+        }
+
+        .brand-badge {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: #ffb703;
+            color: #0b3d56;
+            font-weight: 900;
+            box-shadow: 0 8px 18px rgba(255, 183, 3, 0.32);
+        }
+
+        .brand-title {
+            margin: 0;
+            color: #0b3d56;
+            font-size: 20px;
+            line-height: 1.05;
+            font-weight: 900;
+        }
+
+        .brand-subtitle {
+            margin: 3px 0 0;
+            color: #63798a;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .main-nav {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            color: #315066;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .main-nav a:hover {
+            color: #0796b5;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 12px 20px;
+            border: 0;
+            border-radius: 999px;
+            background: #0b5d7a;
+            color: #ffffff;
+            font-weight: 900;
+            box-shadow: 0 12px 24px rgba(11, 93, 122, 0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            background: #0796b5;
+            box-shadow: 0 16px 28px rgba(7, 150, 181, 0.22);
+        }
+
+        .button.secondary {
+            background: #ffffff;
+            color: #0b5d7a;
+            border: 2px solid #0b5d7a;
+            box-shadow: none;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 12% 22%, rgba(255, 183, 3, 0.28), transparent 24%),
+                radial-gradient(circle at 84% 18%, rgba(7, 150, 181, 0.20), transparent 26%),
+                linear-gradient(135deg, #eaf8ff 0%, #ffffff 58%, #fff7df 100%);
+        }
+
+        .hero-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+            gap: clamp(28px, 5vw, 66px);
+            align-items: center;
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto;
+            min-height: 630px;
+            padding: 72px 0 88px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 18px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: #dff6fb;
+            color: #0b5d7a;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            color: #0b3d56;
+            font-size: clamp(42px, 6vw, 76px);
+            line-height: 0.96;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-copy {
+            max-width: 630px;
+            margin: 24px 0 0;
+            color: #46687b;
+            font-size: clamp(18px, 2.2vw, 23px);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 30px;
+        }
+
+        .hero-note {
+            margin-top: 24px;
+            color: #6b7f8e;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .learning-scene {
+            position: relative;
+            min-height: 470px;
+        }
+
+        .screen-card {
+            position: absolute;
+            inset: 42px 12px 40px 34px;
+            border-radius: 34px;
+            background: #ffffff;
+            border: 8px solid #17324d;
+            box-shadow: 0 28px 60px rgba(23, 50, 77, 0.18);
+            overflow: hidden;
+        }
+
+        .screen-top {
+            display: flex;
+            gap: 8px;
+            padding: 18px;
+            background: #17324d;
+        }
+
+        .dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ffb703;
+        }
+
+        .dot:nth-child(2) {
+            background: #2ec4b6;
+        }
+
+        .dot:nth-child(3) {
+            background: #fb8500;
+        }
+
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            padding: 28px;
+        }
+
+        .lesson-tile {
+            min-height: 126px;
+            padding: 18px;
+            border-radius: 22px;
+            background: #f1f8fb;
+            border: 2px solid #d9eef5;
+        }
+
+        .lesson-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            margin-bottom: 14px;
+            border-radius: 14px;
+            background: #0b5d7a;
+            color: #ffffff;
+            font-weight: 900;
+        }
+
+        .lesson-tile strong {
+            display: block;
+            color: #17324d;
+            font-size: 18px;
+        }
+
+        .progress-card {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: min(260px, 55%);
+            padding: 22px;
+            border-radius: 26px;
+            background: #ffb703;
+            color: #17324d;
+            box-shadow: 0 22px 40px rgba(255, 183, 3, 0.32);
+        }
+
+        .progress-card strong {
+            display: block;
+            font-size: 42px;
+            line-height: 1;
+        }
+
+        .progress-card span {
+            display: block;
+            margin-top: 8px;
+            font-weight: 900;
+        }
+
+        .section {
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 72px 0;
+        }
+
+        .section-heading {
+            max-width: 780px;
+            margin-bottom: 34px;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            color: #0b3d56;
+            font-size: clamp(34px, 4vw, 54px);
+            line-height: 1.05;
+        }
+
+        .section-heading p {
+            margin: 16px 0 0;
+            color: #526f80;
+            font-size: 19px;
+            line-height: 1.55;
+        }
+
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .solution-card {
+            min-height: 250px;
+            padding: 26px;
+            border-radius: 26px;
+            background: #ffffff;
+            border: 1px solid #dcebf2;
+            box-shadow: 0 18px 34px rgba(23, 50, 77, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 26px 42px rgba(23, 50, 77, 0.12);
+        }
+
+        .solution-icon {
+            display: grid;
+            place-items: center;
+            width: 58px;
+            height: 58px;
+            margin-bottom: 22px;
+            border-radius: 18px;
+            background: #dff6fb;
+            color: #0b5d7a;
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .solution-card:nth-child(2) .solution-icon {
+            background: #fff1c8;
+            color: #b66d00;
+        }
+
+        .solution-card:nth-child(3) .solution-icon {
+            background: #e9f8e8;
+            color: #237a3b;
+        }
+
+        .solution-card:nth-child(4) .solution-icon {
+            background: #f3e9ff;
+            color: #6932a8;
+        }
+
+        .solution-card h3 {
+            margin: 0 0 12px;
+            color: #17324d;
+            font-size: 23px;
+        }
+
+        .solution-card p {
+            margin: 0;
+            color: #5d7382;
+            line-height: 1.55;
+        }
+
+        .feature-band {
+            background: #0b3d56;
+            color: #ffffff;
+        }
+
+        .feature-shell {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
+            gap: clamp(30px, 5vw, 70px);
+            align-items: center;
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 76px 0;
+        }
+
+        .feature-panel {
+            border-radius: 32px;
+            background: #ffffff;
+            color: #17324d;
+            padding: 30px;
+        }
+
+        .feature-panel h2 {
+            margin: 0;
+            font-size: clamp(32px, 4vw, 52px);
+            line-height: 1.05;
+        }
+
+        .feature-panel p {
+            color: #526f80;
+            font-size: 18px;
+            line-height: 1.55;
+        }
+
+        .checks {
+            display: grid;
+            gap: 16px;
+        }
+
+        .check {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .check span {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ffb703;
+            color: #17324d;
+            font-weight: 900;
+        }
+
+        .check strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 18px;
+        }
+
+        .check p {
+            margin: 0;
+            color: #dbeaf1;
+            line-height: 1.5;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .stat {
+            padding: 26px;
+            border-radius: 24px;
+            background: #ffffff;
+            border: 1px solid #dcebf2;
+            color: #17324d;
+            text-align: center;
+        }
+
+        .stat strong {
+            display: block;
+            color: #0b5d7a;
+            font-size: clamp(34px, 4vw, 54px);
+            line-height: 1;
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 10px;
+            color: #5d7382;
+            font-weight: 800;
+        }
+
+        .cta {
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto 68px;
+            padding: clamp(34px, 6vw, 64px);
+            border-radius: 34px;
+            background:
+                radial-gradient(circle at 14% 32%, rgba(255, 255, 255, 0.32), transparent 23%),
+                linear-gradient(135deg, #ffb703, #fb8500);
+            color: #17324d;
+        }
+
+        .cta h2 {
+            max-width: 760px;
+            margin: 0;
+            font-size: clamp(34px, 5vw, 58px);
+            line-height: 1.02;
+        }
+
+        .cta p {
+            max-width: 700px;
+            margin: 16px 0 26px;
+            font-size: 20px;
+            line-height: 1.45;
+        }
+
+        .footer {
+            padding: 28px 18px;
+            background: #17324d;
+            color: #dbeaf1;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 920px) {
+            .nav-shell,
+            .main-nav,
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .brand {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .hero-shell,
+            .feature-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .learning-scene {
+                min-height: 430px;
+            }
+
+            .solutions-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 620px) {
+            .top-strip {
+                display: none;
+            }
+
+            .main-nav {
+                gap: 14px;
+                font-size: 12px;
+            }
+
+            .header-actions,
+            .hero-actions {
+                width: 100%;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .hero-shell {
+                padding-top: 46px;
+            }
+
+            .screen-card {
+                inset: 28px 0 40px 0;
+            }
+
+            .lesson-grid,
+            .solutions-grid,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-card {
+                width: 78%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-strip">
+        <a href="#start">Start a Free Classroom Trial</a>
+        <a href="studyhub.html">Student Login</a>
+        <a href="#solutions">Curriculum Support</a>
+    </div>
+
+    <header class="site-header">
+        <div class="nav-shell">
+            <a class="brand" href="#top" aria-label="Riverside View Learning Portal">
+                <span class="brand-badge">RV</span>
+                <span>
+                    <span class="brand-title">Riverside View</span>
+                    <span class="brand-subtitle">Learning Portal</span>
+                </span>
+            </a>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="#solutions">Solutions</a>
+                <a href="#skills">Digital Skills</a>
+                <a href="#results">Results</a>
+                <a href="#start">Get Started</a>
+            </nav>
+
+            <div class="header-actions">
+                <a class="button secondary" href="studyhub.html">Login</a>
+                <a class="button" href="#start">Try Free</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="top">
+        <section class="hero">
+            <div class="hero-shell">
+                <div>
+                    <p class="eyebrow">K-8 digital learning made simple</p>
+                    <h1>Future-ready skills for every classroom.</h1>
+                    <p class="hero-copy">
+                        Help students build confidence in digital literacy, coding, AI readiness, keyboarding, and online safety with lessons that feel clear, useful, and school-friendly.
+                    </p>
+                    <div class="hero-actions">
+                        <a class="button" href="#solutions">Explore curriculum</a>
+                        <a class="button secondary" href="studyhub.html">Open student hub</a>
+                    </div>
+                    <p class="hero-note">Built for classrooms, families, and curious students.</p>
+                </div>
+
+                <div class="learning-scene" aria-hidden="true">
+                    <div class="screen-card">
+                        <div class="screen-top">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                        <div class="lesson-grid">
+                            <div class="lesson-tile">
+                                <span class="lesson-icon">AI</span>
+                                <strong>AI Literacy</strong>
+                            </div>
+                            <div class="lesson-tile">
+                                <span class="lesson-icon">{ }</span>
+                                <strong>Coding</strong>
+                            </div>
+                            <div class="lesson-tile">
+                                <span class="lesson-icon">abc</span>
+                                <strong>Keyboarding</strong>
+                            </div>
+                            <div class="lesson-tile">
+                                <span class="lesson-icon">✓</span>
+                                <strong>Online Safety</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-card">
+                        <strong>4</strong>
+                        <span>core skill tracks ready for students</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="solutions">
+            <div class="section-heading">
+                <h2>Digital learning that fits the school day.</h2>
+                <p>
+                    Give students practical, age-appropriate practice while keeping teachers supported with simple paths, clear lessons, and flexible classroom use.
+                </p>
+            </div>
+
+            <div class="solutions-grid">
+                <a class="solution-card" href="studyhub.html">
+                    <span class="solution-icon">AI</span>
+                    <h3>AI Readiness</h3>
+                    <p>Introduce responsible AI habits, prompt thinking, and safe classroom discussions.</p>
+                </a>
+                <a class="solution-card" href="studyhub.html">
+                    <span class="solution-icon">⌨</span>
+                    <h3>Keyboarding</h3>
+                    <p>Build accuracy, speed, posture, and confidence through regular practice.</p>
+                </a>
+                <a class="solution-card" href="studyhub.html">
+                    <span class="solution-icon">&lt;/&gt;</span>
+                    <h3>Coding</h3>
+                    <p>Explore sequencing, logic, problem solving, and creative digital projects.</p>
+                </a>
+                <a class="solution-card" href="studyhub.html">
+                    <span class="solution-icon">🛡</span>
+                    <h3>Digital Citizenship</h3>
+                    <p>Practice privacy, kindness, credibility, and safe online decision-making.</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="feature-band" id="skills">
+            <div class="feature-shell">
+                <div class="feature-panel">
+                    <h2>Easy to launch. Strong enough to grow with students.</h2>
+                    <p>
+                        Lessons are organized for quick classroom use, with flexible subject paths that can support independent practice, small groups, or whole-class instruction.
+                    </p>
+                    <a class="button" href="studyhub.html">Go to learning hub</a>
+                </div>
+
+                <div class="checks">
+                    <div class="check">
+                        <span>1</span>
+                        <div>
+                            <strong>Simple subject paths</strong>
+                            <p>Students can quickly find math, reading, science, social studies, and digital skill resources.</p>
+                        </div>
+                    </div>
+                    <div class="check">
+                        <span>2</span>
+                        <div>
+                            <strong>Teacher-friendly layout</strong>
+                            <p>Pages are organized so teachers can point students to activities without extra setup.</p>
+                        </div>
+                    </div>
+                    <div class="check">
+                        <span>3</span>
+                        <div>
+                            <strong>Safe resource-first design</strong>
+                            <p>The site feels like a school portal, with clear calls to action and calm learning sections.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="results">
+            <div class="section-heading">
+                <h2>Designed for steady progress.</h2>
+                <p>
+                    Keep students focused with a learning-first homepage that highlights confidence, access, efficiency, and real classroom use.
+                </p>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <strong>K-8</strong>
+                    <span>student-friendly resource levels</span>
+                </div>
+                <div class="stat">
+                    <strong>4</strong>
+                    <span>digital skill focus areas</span>
+                </div>
+                <div class="stat">
+                    <strong>1</strong>
+                    <span>simple student hub</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta" id="start">
+            <h2>Ready to help students learn smarter?</h2>
+            <p>
+                Start with the student hub, then connect learners to classroom resources, skill practice, and helpful digital activities.
+            </p>
+            <a class="button secondary" href="studyhub.html">Open Riverside View Portal</a>
+        </section>
+    </main>
+
+    <footer class="footer">
+        Riverside View Learning Portal · Digital skills, classroom resources, and student practice
+    </footer>
+</body>
+</html>
