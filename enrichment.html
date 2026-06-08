@@ -560,6 +560,12 @@
         let luminTotalGames = 0;
         const luminPageLimit = 200;
         const luminDirectoryCacheKey = "aether:lumin-directory:v2";
+        const gnMathZonesUrls = [
+            "https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json",
+            "https://raw.githubusercontent.com/gn-math/assets/main/zones.json"
+        ];
+        const gnMathCoverUrl = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
+        const gnMathHtmlUrl = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
 
         const fallbackGames = [
             { id: "play-2048", name: "2048", category: "Puzzle", url: "https://play2048.co/" },
@@ -613,6 +619,49 @@
         function normalizeGames(result) {
             if (Array.isArray(result)) return result;
             return result?.games || [];
+        }
+
+        function normalizeGnMathZone(zone) {
+            const url = String(zone.url || "")
+                .replaceAll("{COVER_URL}", gnMathCoverUrl)
+                .replaceAll("{HTML_URL}", gnMathHtmlUrl);
+            const cover = String(zone.cover || "")
+                .replaceAll("{COVER_URL}", gnMathCoverUrl)
+                .replaceAll("{HTML_URL}", gnMathHtmlUrl);
+            const special = Array.isArray(zone.special) && zone.special.length
+                ? `GN Math ${zone.special[0]}`
+                : "GN Math";
+
+            return {
+                id: `gn-${zone.id}`,
+                name: zone.name || `GN Math ${zone.id}`,
+                category: special,
+                cover_url: cover,
+                html_url: url,
+                source: "gn-math",
+                author: zone.author || ""
+            };
+        }
+
+        async function fetchJsonFromAny(urls) {
+            let lastError = null;
+            for (const url of urls) {
+                try {
+                    const response = await fetch(`${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`);
+                    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+                    return await response.json();
+                } catch (err) {
+                    lastError = err;
+                }
+            }
+            throw lastError || new Error("Could not fetch catalog.");
+        }
+
+        async function loadGnMathGames() {
+            const zones = await fetchJsonFromAny(gnMathZonesUrls);
+            return zones
+                .filter((zone) => zone?.id !== undefined && zone?.name && zone?.url)
+                .map(normalizeGnMathZone);
         }
 
         function withTimeout(promise, timeout, message) {
@@ -694,6 +743,15 @@
         }
 
         function mergeLuminGames(games) {
+            const seen = new Set(allGames.map((game) => game.id));
+            const freshGames = games.filter((game) => game?.id && !seen.has(game.id));
+            if (!freshGames.length) return false;
+
+            allGames = allGames.concat(freshGames);
+            return true;
+        }
+
+        function mergeCatalogGames(games) {
             const seen = new Set(allGames.map((game) => game.id));
             const freshGames = games.filter((game) => game?.id && !seen.has(game.id));
             if (!freshGames.length) return false;
@@ -793,6 +851,11 @@
 
         async function loadImages(games) {
             await Promise.all(games.map(async (game) => {
+                if (game.cover_url) {
+                    imageUrls[game.id] = game.cover_url;
+                    return;
+                }
+
                 if (game.url && !game.image_token) {
                     imageUrls[game.id] = getFallbackImage(game);
                     return;
@@ -844,6 +907,11 @@
         }
 
         function playGame(game) {
+            if (game.html_url) {
+                openHtmlGame(game);
+                return;
+            }
+
             if (game.url) {
                 window.location.href = `research.html?goto=${encodeURIComponent(game.url)}`;
                 return;
@@ -863,6 +931,28 @@
             });
         }
 
+        async function openHtmlGame(game) {
+            setStatus(`Opening ${game.name}...`);
+
+            try {
+                const response = await fetch(game.html_url);
+                if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+                let html = await response.text();
+                const baseTag = `<base href="${gnMathHtmlUrl}/">`;
+                if (/<head[^>]*>/i.test(html)) {
+                    html = html.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
+                } else {
+                    html = `${baseTag}${html}`;
+                }
+
+                const blob = new Blob([html], { type: "text/html" });
+                window.location.href = URL.createObjectURL(blob);
+            } catch (err) {
+                console.error("GN Math game launch failed:", err);
+                window.location.href = `research.html?goto=${encodeURIComponent(game.html_url)}`;
+            }
+        }
+
         function renderGames(games) {
             grid.innerHTML = "";
             imageObserver?.disconnect();
@@ -873,7 +963,8 @@
                 return;
             }
 
-            setStatus(luminTotalGames > games.length ? `${games.length} of ${luminTotalGames} games` : `${games.length} games`);
+            const totalGames = allGames.length || luminTotalGames;
+            setStatus(totalGames > games.length ? `${games.length} of ${totalGames} games` : `${games.length} games`);
 
             for (const game of games) {
                 const card = document.createElement("button");
@@ -883,6 +974,10 @@
 
                 const image = document.createElement("img");
                 image.alt = game.name;
+                image.onerror = () => {
+                    image.onerror = null;
+                    image.src = getFallbackImage(game);
+                };
                 if (imageUrls[game.id]) {
                     image.src = imageUrls[game.id];
                 } else if (!game.image_token) {
@@ -934,6 +1029,15 @@
                 updateCategories(categories);
                 await loadImages(allGames.slice(0, 24));
                 refreshGames();
+                loadGnMathGames().then(async (gnGames) => {
+                    if (!mergeCatalogGames(gnGames)) return;
+                    updateCategories(categoriesFromGames(allGames));
+                    await loadImages(gnGames.slice(0, 24));
+                    refreshGames();
+                    setStatus(`${allGames.length} games`);
+                }).catch((err) => {
+                    console.error("GN Math catalog failed:", err);
+                });
                 loadRemainingLuminPages(2).catch((err) => {
                     console.error("More Lumin pages failed:", err);
                     setStatus(`${allGames.length} games loaded. More pages failed.`);
@@ -942,7 +1046,16 @@
             } catch (err) {
                 console.error("LuminSDK error:", err);
                 if (cachedDirectory) {
-                    setStatus(`${allGames.length} cached Lumin games`);
+                    try {
+                        const gnGames = await loadGnMathGames();
+                        mergeCatalogGames(gnGames);
+                        await loadImages(gnGames.slice(0, 24));
+                        updateCategories(categoriesFromGames(allGames));
+                        refreshGames();
+                    } catch (gnErr) {
+                        console.error("GN Math catalog failed:", gnErr);
+                    }
+                    setStatus(`${allGames.length} games`);
                     return;
                 }
                 usingFallbackGames = false;
@@ -950,7 +1063,16 @@
                 luminTotalGames = 0;
                 updateCategories([]);
                 grid.innerHTML = "";
-                setStatus("Lumin games failed to load.");
+                try {
+                    setStatus("Loading GN Math games...");
+                    allGames = await loadGnMathGames();
+                    await loadImages(allGames.slice(0, 24));
+                    updateCategories(categoriesFromGames(allGames));
+                    refreshGames();
+                } catch (gnErr) {
+                    console.error("GN Math catalog failed:", gnErr);
+                    setStatus("Game catalogs failed to load.");
+                }
             }
         }
 
@@ -960,30 +1082,13 @@
             setStatus("Loading random games...");
 
             if (!allGames.length && !window.Lumin) {
-                setStatus("Lumin games failed to load.");
+                setStatus("Game catalogs failed to load.");
                 return;
             }
 
-            if (usingFallbackGames || !window.Lumin) {
-                const shuffled = [...allGames].sort(() => Math.random() - 0.5).slice(0, 20);
-                await loadImages(shuffled);
-                renderGames(shuffled);
-                return;
-            }
-
-            try {
-                const result = await Lumin.getRandomGames(20);
-                const games = normalizeGames(result);
-                await loadImages(games);
-                renderGames(games);
-            } catch (err) {
-                console.error("Random games failed:", err);
-                usingFallbackGames = true;
-                allGames = fallbackGames;
-                const shuffled = [...allGames].sort(() => Math.random() - 0.5).slice(0, 20);
-                await loadImages(shuffled);
-                renderGames(shuffled);
-            }
+            const shuffled = [...allGames].sort(() => Math.random() - 0.5).slice(0, 20);
+            await loadImages(shuffled);
+            renderGames(shuffled);
         });
 
         window.addEventListener("beforeunload", () => {
