@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AETHER Settings</title>
+    <link rel="icon" id="favicon" href="">
+    <style>
+        :root {
+            --panel: rgba(0, 0, 0, 0.35);
+            --panel-strong: rgba(0, 0, 0, 0.48);
+            --line: #ffffff;
+            --text: #ffffff;
+            --muted: rgba(255, 255, 255, 0.7);
+            --blur: 15px;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #121212 url("aether background.png") center / cover fixed no-repeat;
+            font-family: "Courier New", Courier, monospace;
+            color: var(--text);
+        }
+
+        body { overflow-x: hidden; }
+        button, input { font-family: inherit; }
+
+        .appleseed {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel) !important;
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border-radius: 20px;
+            padding: 10px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid var(--line);
+            z-index: 50;
+            min-width: 320px;
+            gap: 22px;
+        }
+
+        .nav-action, .homebutton {
+            width: 56px;
+            height: 52px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-action:hover, .homebutton:hover { transform: scale(1.12); opacity: 0.85; }
+        .controller-svg { width: 58px; height: 42px; display: block; }
+        .settings-svg { width: 42px; height: 42px; display: block; }
+
+        .home-icon { position: relative; display: block; width: 38px; height: 34px; }
+        .home-icon::before {
+            content: ""; position: absolute; left: 4px; top: 12px; width: 30px; height: 22px;
+            background: #ffffff; clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 63% 100%, 63% 54%, 37% 54%, 37% 100%, 0 100%);
+        }
+        .home-icon::after {
+            content: ""; position: absolute; left: 2px; top: 0; width: 34px; height: 28px;
+            background: #ffffff; clip-path: polygon(50% 0, 100% 58%, 90% 68%, 50% 24%, 10% 68%, 0 58%);
+        }
+        .home-chimney { position: absolute; right: 5px; top: 3px; width: 8px; height: 15px; background: #ffffff; border-radius: 2px 2px 0 0; }
+
+        .apps-icon { position: relative; width: 34px; height: 34px; }
+        .apps-square { position: absolute; width: 12px; height: 12px; border: 3px solid #ffffff; border-radius: 5px; box-sizing: border-box; }
+        .apps-square.one { left: 0; top: 0; }
+        .apps-square.two { right: 0; top: 0; }
+        .apps-square.three { left: 0; bottom: 0; }
+        .apps-plus { position: absolute; right: 1px; bottom: 1px; width: 14px; height: 14px; }
+        .apps-plus::before, .apps-plus::after { content: ""; position: absolute; background: #ffffff; border-radius: 2px; }
+        .apps-plus::before { left: 0; top: 5px; width: 14px; height: 4px; }
+        .apps-plus::after { left: 5px; top: 0; width: 4px; height: 14px; }
+
+        .page {
+            position: relative;
+            z-index: 2;
+            width: min(860px, calc(100% - 36px));
+            margin: 0 auto;
+            padding: 140px 0 60px;
+        }
+
+        .title {
+            margin: 0 0 28px;
+            font-size: clamp(48px, 8vw, 98px);
+            line-height: 0.9;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            letter-spacing: 0;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .panel {
+            background: var(--panel);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 4px solid var(--line);
+            border-radius: 20px;
+            padding: 22px;
+            box-sizing: border-box;
+            box-shadow: 0 0 28px rgba(255, 255, 255, 0.08);
+        }
+        .wide { grid-column: 1 / -1; }
+        h2 { margin: 0 0 16px; font-size: 24px; }
+
+        .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.22); }
+        .row:first-of-type { border-top: none; }
+        .row label { font-size: 17px; }
+
+        .toggle {
+            appearance: none; width: 64px; height: 34px; border: 3px solid var(--line); border-radius: 999px;
+            background: rgba(0, 0, 0, 0.34); position: relative; flex: 0 0 auto; cursor: pointer;
+        }
+        .toggle::after { content: ""; position: absolute; width: 18px; height: 18px; left: 5px; top: 5px; border-radius: 50%; background: var(--line); box-shadow: 0 0 12px rgba(255,255,255,0.8); transition: transform 0.2s ease; }
+        .toggle:checked::after { transform: translateX(28px); }
+
+        .range { width: min(220px, 42vw); accent-color: #ffffff; }
+        .text-input {
+            width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.42); color: #ffffff;
+            border: 4px solid #ffffff; border-radius: 18px; padding: 14px 16px; font-size: 16px; outline: none;
+        }
+
+        .preset-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+        .preset {
+            min-height: 76px; border: 4px solid #ffffff; border-radius: 18px; cursor: pointer;
+            background-size: cover; background-position: center; color: #ffffff; font-weight: bold; text-shadow: 0 0 8px #000;
+        }
+        .preset.default { background-image: url("aether background.png"); }
+        .preset.night { background: linear-gradient(135deg, #050505, #122033 58%, #12051f); }
+        .preset.ocean { background: linear-gradient(135deg, #001219, #005f73, #0a9396); }
+        .preset.none { background: #121212; }
+
+        .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        .btn {
+            background: var(--panel-strong); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+            border: 4px solid var(--line); border-radius: 20px; color: var(--text); font-size: 18px; padding: 16px 14px;
+            cursor: pointer; min-height: 64px; transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .btn:hover { transform: scale(1.04); background: rgba(255,255,255,0.12); }
+
+        #cloakSelect {
+            width: 100%;
+            appearance: auto;
+        }
+
+        .bubble-container { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .bubble { position: absolute; bottom: -50px; left: var(--start-x); width: var(--size); height: var(--size); border-radius: 50%; opacity: var(--max-opacity); animation: floatUp var(--speed) linear infinite; animation-delay: var(--delay); background: var(--color); box-shadow: 0 0 15px var(--color); }
+        @keyframes floatUp { 0% { transform: translateY(0) translateX(0); opacity: var(--max-opacity); } 50% { opacity: calc(var(--max-opacity) * 1.5); } 100% { transform: translateY(-110vh) translateX(var(--drift-x)); opacity: 0; } }
+        body.reduce-motion .bubble, body.reduce-motion * { animation: none !important; transition: none !important; }
+        body.hide-bubbles .bubble-container { display: none; }
+
+        @media (max-width: 720px) {
+            .appleseed { min-width: 0; width: calc(100% - 44px); padding: 8px 18px; gap: 14px; }
+            .grid, .actions, .preset-grid { grid-template-columns: 1fr; }
+            .page { padding-top: 128px; }
+            .row { align-items: flex-start; flex-direction: column; }
+            .range { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <script src="page-loader.js"></script>
+
+    <nav class="appleseed">
+        <button class="nav-action" onclick="window.location.href='enrichment.html'" title="Games" aria-label="Games">
+            <svg class="controller-svg" aria-hidden="true" viewBox="0 0 96 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 20C17 22 13 33 9 49C8 55 18 58 22 51L30 37H66L74 51C78 58 88 55 87 49C83 33 79 22 72 20C62 17 34 17 24 20Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="31" cy="30" r="5" fill="white"/><circle cx="64" cy="30" r="4" fill="white"/><circle cx="73" cy="35" r="4" fill="white"/><path d="M40 42H52M46 36V48" stroke="white" stroke-width="5" stroke-linecap="round"/><path d="M44 27H49M57 27H62" stroke="white" stroke-width="5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="homebutton" onclick="window.location.href='studyhub.html'" title="Home" aria-label="Home"><span class="home-icon" aria-hidden="true"><span class="home-chimney"></span></span></button>
+        <button class="nav-action" onclick="window.location.href='resources.html'" title="Apps" aria-label="Apps"><span class="apps-icon" aria-hidden="true"><span class="apps-square one"></span><span class="apps-square two"></span><span class="apps-square three"></span><span class="apps-plus"></span></span></button>
+        <button class="nav-action settings-action" type="button" title="Settings" aria-label="Settings"><svg class="settings-svg" aria-hidden="true" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M29 4H35L37 11.5C39.2 12.1 41.2 13 43 14.1L49.7 10.2L53.8 14.3L49.9 21C51 22.8 51.9 24.8 52.5 27L60 29V35L52.5 37C51.9 39.2 51 41.2 49.9 43L53.8 49.7L49.7 53.8L43 49.9C41.2 51 39.2 51.9 37 52.5L35 60H29L27 52.5C24.8 51.9 22.8 51 21 49.9L14.3 53.8L10.2 49.7L14.1 43C13 41.2 12.1 39.2 11.5 37L4 35V29L11.5 27C12.1 24.8 13 22.8 14.1 21L10.2 14.3L14.3 10.2L21 14.1C22.8 13 24.8 12.1 27 11.5L29 4Z" fill="white"/><circle cx="32" cy="32" r="9" fill="#121212" opacity="0.8"/></svg></button>
+    </nav>
+
+    <main class="page">
+        <h1 class="title">SETTINGS</h1>
+        <section class="grid">
+            <div class="panel">
+                <h2>Look</h2>
+                <div class="row"><label for="bubbles-toggle">Bubbles</label><input class="toggle" id="bubbles-toggle" type="checkbox" checked /></div>
+                <div class="row"><label for="motion-toggle">Motion</label><input class="toggle" id="motion-toggle" type="checkbox" checked /></div>
+                <div class="row"><label for="shade-range">Glass</label><input class="range" id="shade-range" type="range" min="20" max="65" value="35" /></div>
+                <div class="row"><label for="blur-range">Blur</label><input class="range" id="blur-range" type="range" min="6" max="24" value="15" /></div>
+            </div>
+
+            <div class="panel">
+                <h2>Background</h2>
+                <div class="preset-grid">
+                    <button class="preset default" data-bg="default">Default</button>
+                    <button class="preset night" data-bg="night">Night</button>
+                    <button class="preset ocean" data-bg="ocean">Ocean</button>
+                    <button class="preset none" data-bg="none">Plain</button>
+                </div>
+                <div style="height:14px"></div>
+                <input class="text-input" id="custom-bg" type="url" placeholder="custom image URL" />
+                <div style="height:12px"></div>
+                <button class="btn" id="save-bg" type="button">Save background</button>
+            </div>
+
+            <div class="panel wide">
+                <h2>Tools</h2>
+
+                <div class="actions">
+                    <button class="btn" id="aboutBlankBtn" type="button">About:Blank</button>
+                    <button class="btn" id="blobBtn" type="button">Blob Page</button>
+                </div>
+
+                <br>
+
+                <select class="btn" id="cloakSelect">
+                    <option value="">Cloak Tab As...</option>
+                    <option value="google">Google</option>
+                    <option value="classroom">Google Classroom</option>
+                    <option value="kahoot">Kahoot</option>
+                </select>
+            </div>
+        </section>
+    </main>
+
+    <div class="bubble-container">
+        <div class="bubble" style="--start-x:5%;--drift-x:40px;--size:14px;--speed:9s;--delay:0s;--max-opacity:0.6;--color:#00b4d8"></div>
+        <div class="bubble" style="--start-x:12%;--drift-x:-30px;--size:26px;--speed:13s;--delay:4s;--max-opacity:0.5;--color:#7209b7"></div>
+        <div class="bubble" style="--start-x:22%;--drift-x:50px;--size:16px;--speed:8s;--delay:1.5s;--max-opacity:0.7;--color:#00f5d4"></div>
+        <div class="bubble" style="--start-x:35%;--drift-x:-45px;--size:32px;--speed:16s;--delay:7s;--max-opacity:0.4;--color:#2ec4b6"></div>
+        <div class="bubble" style="--start-x:68%;--drift-x:60px;--size:28px;--speed:14s;--delay:.8s;--max-opacity:0.6;--color:#00f5d4"></div>
+    </div>
+
+    <script>const store = window.localStorage;const bgMap = {
+default: '#121212 url("aether background.png") center / cover fixed no-repeat',
+night: 'linear-gradient(135deg, #050505, #122033 58%, #12051f) fixed',
+ocean: 'linear-gradient(135deg, #001219, #005f73, #0a9396) fixed',
+none: '#121212'
+};const cloaks = {
+google: {
+title: "Google",
+icon: "https://www.google.com/favicon.ico"
+},
+classroom: {
+title: "Google Classroom",
+icon: "https://ssl.gstatic.com/classroom/favicon.png"
+},
+kahoot: {
+title: "Kahoot!",
+icon: "https://kahoot.com/favicon.ico"
+}
+};const bubblesToggle = document.getElementById('bubbles-toggle');const motionToggle = document.getElementById('motion-toggle');const shadeRange = document.getElementById('shade-range');const blurRange = document.getElementById('blur-range');const customBg = document.getElementById('custom-bg');function readSetting(key, fallback) {
+const value = store.getItem(key);
+return value === null ? fallback : value;
+}function backgroundValue() {
+const custom = readSetting(
+'aether.settings.customBg',
+''
+).trim();
+
+if(custom) {
+return `#121212 url("${custom.replace(/"/g,'%22')}") center / cover fixed no-repeat`;
+}
+
+return bgMap[
+readSetting('aether.settings.bg','default')
+] || bgMap.default;
+}function applySettings() {
+
+const bubbles = bubblesToggle.checked;
+const motion = motionToggle.checked;
+const shade = Number(shadeRange.value);
+const blur = Number(blurRange.value);
+
+
+document.body.classList.toggle(
+'hide-bubbles',
+!bubbles
+);
+
+document.body.classList.toggle(
+'reduce-motion',
+!motion
+);
+
+
+document.documentElement.style.setProperty(
+'--panel',
+`rgba(0,0,0,${shade/100})`
+);
+
+
+document.documentElement.style.setProperty(
+'--panel-strong',
+`rgba(0,0,0,${Math.min(.72,(shade+13)/100)})`
+);
+
+
+document.documentElement.style.setProperty(
+'--blur',
+`${blur}px`
+);
+
+
+document.body.style.background =
+backgroundValue();
+
+
+document.documentElement.style.background =
+backgroundValue();
+
+
+
+store.setItem(
+'aether.settings.bubbles',
+bubbles ? '1':'0'
+);
+
+store.setItem(
+'aether.settings.motion',
+motion ? '1':'0'
+);
+
+store.setItem(
+'aether.settings.shade',
+shade
+);
+
+store.setItem(
+'aether.settings.blur',
+blur
+);
+}bubblesToggle.checked =readSetting('aether.settings.bubbles','1') === '1';motionToggle.checked =readSetting('aether.settings.motion','1') === '1';shadeRange.value =readSetting('aether.settings.shade','35');blurRange.value =readSetting('aether.settings.blur','15');customBg.value =readSetting('aether.settings.customBg','');document.querySelectorAll('.preset').forEach(button=>{
+
+button.onclick = ()=>{
+
+store.setItem(
+'aether.settings.bg',
+button.dataset.bg
+);
+
+store.removeItem(
+'aether.settings.customBg'
+);
+
+customBg.value="";
+
+applySettings();
+};
+
+});document.getElementById('save-bg').onclick=()=>{
+
+store.setItem(
+'aether.settings.customBg',
+customBg.value.trim()
+);
+
+applySettings();
+
+};
+
+
+
+[bubblesToggle,motionToggle,shadeRange,blurRange
+].forEach(input=>{
+
+input.oninput =
+input.onchange =
+applySettings;
+
+});applySettings();document.getElementById("aboutBlankBtn"
+).onclick=()=>{const win =window.open("about:blank","_blank"
+);if(!win) return;win.document.title =document.title;const icon =document.querySelector("#favicon");if(icon && icon.href){
+
+const link =
+win.document.createElement("link");
+
+link.rel="icon";
+link.href=icon.href;
+
+win.document.head.appendChild(link);
+
+}win.document.body.style.margin="0";win.document.body.innerHTML=`
+
+<iframe
+src="${location.href}"
+style="
+position:fixed;
+top:0;
+left:0;
+width:100vw;
+height:100vh;
+border:0;
+">
+</iframe>
+
+`;
+
+};document.getElementById("blobBtn"
+).onclick=()=>{const html=`
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>AETHER</title>
+
+
+<style>
+
+body{
+
+margin:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:#121212;
+
+color:white;
+
+font-family:"Courier New";
+
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+AETHER Blob Page
+
+</body>
+
+
+</html>
+
+`;const blob =new Blob(
+[html],
+{
+type:"text/html"
+}
+);window.open(URL.createObjectURL(blob),"_blank"
+);
+
+
+};function setCloak(name){const cloak =cloaks[name];if(!cloak) return;document.title =cloak.title;document.getElementById("favicon").href =cloak.icon;localStorage.setItem("aether.cloak",name
+);
+
+
+}document.getElementById("cloakSelect").onchange=function(){setCloak(this.value);
+
+};const saved =localStorage.getItem("aether.cloak"
+);if(saved){setCloak(saved);
+
+}</script>
+</body>
+</html>

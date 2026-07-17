@@ -1,7 +1,7 @@
 # AETHER Study Hub
 
 AETHER Study Hub is an education-themed web portal with study resources,
-enrichment activities, and a research browser powered by Ultraviolet.
+enrichment activities, and a research browser powered by Dynamic.
 
 ## Pages
 

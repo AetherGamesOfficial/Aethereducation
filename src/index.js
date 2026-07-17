@@ -2,31 +2,27 @@ import { createServer } from "node:http";
 import { hostname } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { bootstrap } from "@mercuryworkshop/proxy-bootstrap";
 import express from "express";
-import wisp from "wisp-server-node";
-
-import { uvPath } from "@titaniumnetwork-dev/ultraviolet";
-import { epoxyPath } from "@mercuryworkshop/epoxy-transport";
-import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const root = resolve(__dirname, "..");
 const app = express();
+const scramjet = await bootstrap({
+	transport: "libcurl",
+});
 
 const pages = new Set([
 	"/studyhub.html",
 	"/research.html",
-	"/research-uv-test.html",
 	"/resources.html",
 	"/enrichment.html",
 	"/loading.html",
+	"/settings.html",
 	"/page-loader.js",
 ]);
 
 app.use(express.static(join(root, "public"), { index: false }));
-app.use("/uv/", express.static(uvPath));
-app.use("/epoxy/", express.static(epoxyPath));
-app.use("/baremux/", express.static(baremuxPath));
 
 app.get("/", (_req, res) => {
 	res.sendFile(join(root, "studyhub.html"));
@@ -50,13 +46,19 @@ app.use((_req, res) => {
 
 const server = createServer((req, res) => {
 	const url = req.url || "";
+	if (scramjet.routeRequest(req, res)) {
+		return;
+	}
+
 	const needsProxyIsolation =
 		url.startsWith("/research") ||
-		url.startsWith("/uv/") ||
-		url.startsWith("/uv-test/") ||
-		url.startsWith("/baremux/") ||
-		url.startsWith("/epoxy/") ||
-		url.startsWith("/register-sw.js");
+		url.startsWith("/~/sj/") ||
+		url.startsWith("/clients/") ||
+		url.startsWith("/controller/") ||
+		url.startsWith("/scram/") ||
+		url.startsWith("/bootstrap-init.js") ||
+		url.startsWith("/sw.js") ||
+		url.startsWith("/wisp/");
 
 	if (needsProxyIsolation) {
 		res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
@@ -67,8 +69,7 @@ const server = createServer((req, res) => {
 });
 
 server.on("upgrade", (req, socket, head) => {
-	if (req.url?.endsWith("/wisp/")) {
-		wisp.routeRequest(req, socket, head);
+	if (scramjet.routeUpgrade(req, socket, head)) {
 		return;
 	}
 

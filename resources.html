@@ -12,7 +12,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #121212;
+            background: #121212 url("aether background.png") center / cover fixed no-repeat;
             color: white;
             font-family: "Courier New", Courier, monospace;
         }
@@ -413,6 +413,68 @@
                 grid-template-columns: 1fr 1fr;
             }
         }
+    
+        button {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }    
+        .appleseed,
+        .nav-action,
+        .homebutton {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .nav-action,
+        .homebutton {
+            border-radius: 12px;
+        }
+
+        .controller-svg,
+        .home-icon,
+        .apps-icon {
+            background: transparent !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .appleseed .nav-action,
+        .appleseed .homebutton,
+        .appleseed .controller-svg,
+        .appleseed .home-icon,
+        .appleseed .apps-icon {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+        }
+        .settings-svg {
+            width: 42px;
+            height: 42px;
+            display: block;
+        }
+        .appleseed {
+            background: rgba(0, 0, 0, 0.35) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .Medeviscool,
+        .VenomOnTop,
+        .deveriono {
+            background: rgba(0, 0, 0, 0.35) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .Medeviscool:hover,
+        .VenomOnTop:hover,
+        .deveriono:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+        }
+
     </style>
 </head>
 <body>
@@ -428,7 +490,7 @@
                 <path d="M44 27H49M57 27H62" stroke="white" stroke-width="5" stroke-linecap="round"/>
             </svg>
         </button>
-        <button class="homebutton" onclick="window.location.href='studyhub.html'" title="Home">
+        <button class="homebutton" onclick="window.location.href='studyhub.html'" title="Home" aria-label="Home">
             <span class="home-icon" aria-hidden="true"><span class="home-chimney"></span></span>
         </button>
         <button class="nav-action" onclick="window.location.href='resources.html'" title="Apps" aria-label="Apps">
@@ -438,6 +500,12 @@
                 <span class="apps-square three"></span>
                 <span class="apps-plus"></span>
             </span>
+        </button>
+        <button class="nav-action settings-action" onclick="window.location.href='settings.html'" type="button" title="Settings" aria-label="Settings">
+            <svg class="settings-svg" aria-hidden="true" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M29 4H35L37 11.5C39.2 12.1 41.2 13 43 14.1L49.7 10.2L53.8 14.3L49.9 21C51 22.8 51.9 24.8 52.5 27L60 29V35L52.5 37C51.9 39.2 51 41.2 49.9 43L53.8 49.7L49.7 53.8L43 49.9C41.2 51 39.2 51.9 37 52.5L35 60H29L27 52.5C24.8 51.9 22.8 51 21 49.9L14.3 53.8L10.2 49.7L14.1 43C13 41.2 12.1 39.2 11.5 37L4 35V29L11.5 27C12.1 24.8 13 22.8 14.1 21L10.2 14.3L14.3 10.2L21 14.1C22.8 13 24.8 12.1 27 11.5L29 4Z" fill="white"/>
+                <circle cx="32" cy="32" r="9" fill="#121212" opacity="0.8"/>
+            </svg>
         </button>
     </nav>
 
@@ -477,5 +545,34 @@
             });
         });
     </script>
+<script>
+(() => {
+    const store = window.localStorage;
+    const bgMap = {
+        default: '#121212 url("aether background.png") center / cover fixed no-repeat',
+        night: 'linear-gradient(135deg, #050505, #122033 58%, #12051f) fixed',
+        ocean: 'linear-gradient(135deg, #001219, #005f73, #0a9396) fixed',
+        none: '#121212'
+    };
+    const custom = (store.getItem('aether.settings.customBg') || '').trim();
+    const mode = store.getItem('aether.settings.bg') || 'default';
+    const bg = custom ? `#121212 url("${custom.replace(/"/g, '%22')}") center / cover fixed no-repeat` : (bgMap[mode] || bgMap.default);
+    document.documentElement.style.background = bg;
+    document.body.style.background = bg;
+    document.querySelectorAll('.settings-action').forEach(button => {
+        button.addEventListener('click', () => { window.location.href = 'settings.html'; });
+    });
+})();
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
