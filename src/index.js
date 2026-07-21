@@ -20,6 +20,7 @@ const pages = new Set([
 	"/loading.html",
 	"/settings.html",
 	"/page-loader.js",
+	"/aether-favicon.png",
 ]);
 
 app.use(express.static(join(root, "public"), { index: false }));
@@ -33,7 +34,7 @@ app.get("/healthz", (_req, res) => {
 });
 
 app.get("/favicon.ico", (_req, res) => {
-	res.status(204).end();
+	res.type("png").sendFile(join(root, "aether-favicon.png"));
 });
 
 app.get([...pages], (req, res) => {
