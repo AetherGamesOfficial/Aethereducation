@@ -635,6 +635,23 @@
         const gnMathCoverUrl = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
         const gnMathHtmlUrl = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
 
+        const manualGames = [
+            {
+                id: "roblox-nowgg",
+                name: "Roblox",
+                category: "Creative",
+                url: "https://nowgg.fun/apps/a/19900/b.html"
+            },
+            {
+                id: "minecraft-26-2",
+                name: "minecraft 26.2",
+                category: "Creative",
+                html_url: "https://raw.githubusercontent.com/EaglercraftNOA/Mojang-hello/main/Novix_26.1.2.html",
+                base_url: "https://raw.githubusercontent.com/EaglercraftNOA/Mojang-hello/main/"
+            },
+        ];
+
+
         const fallbackGames = [
             { id: "play-2048", name: "2048", category: "Puzzle", url: "https://play2048.co/" },
             { id: "tetris", name: "Tetris", category: "Puzzle", url: "https://tetris.com/play-tetris" },
@@ -924,7 +941,7 @@
                     return;
                 }
 
-                if (game.url && !game.image_token) {
+                if ((game.url || game.html_url) && !game.image_token) {
                     imageUrls[game.id] = getFallbackImage(game);
                     return;
                 }
@@ -981,6 +998,9 @@
             }
 
             if (game.url) {
+                try {
+                    sessionStorage.setItem("aether-tool-target", game.url);
+                } catch {}
                 window.location.href = `research.html?goto=${encodeURIComponent(game.url)}`;
                 return;
             }
@@ -1006,7 +1026,9 @@
                 const response = await fetch(game.html_url);
                 if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
                 let html = await response.text();
-                const baseTag = `<base href="${gnMathHtmlUrl}/">`;
+                const htmlBaseUrl = game.base_url || `${gnMathHtmlUrl}/`;
+
+                const baseTag = `<base href="${htmlBaseUrl}">`;
                 if (/<head[^>]*>/i.test(html)) {
                     html = html.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
                 } else {
@@ -1072,6 +1094,7 @@
             const cachedDirectory = getCachedLuminDirectory();
             if (cachedDirectory) {
                 allGames = cachedDirectory.games;
+                mergeCatalogGames(manualGames);
                 luminTotalGames = cachedDirectory.total || cachedDirectory.games.length;
                 updateCategories(categoriesFromGames(allGames));
                 refreshGames();
@@ -1083,6 +1106,7 @@
                 await withTimeout(Lumin.init({ headless: true }), 30000, "Lumin took too long to start.");
                 const firstPage = await withTimeout(getGamesPage(1), 30000, "Lumin games took too long to load.");
                 allGames = firstPage.games;
+                mergeCatalogGames(manualGames);
                 if (!allGames.length) throw new Error("Lumin returned no games.");
                 usingFallbackGames = false;
                 luminTotalPages = firstPage.pages;
@@ -1133,7 +1157,9 @@
                 grid.innerHTML = "";
                 try {
                     setStatus("Loading GN Math games...");
-                    allGames = await loadGnMathGames();
+                    const gnGames = await loadGnMathGames();
+
+                    allGames = manualGames.concat(gnGames.length ? gnGames : fallbackGames);
                     await loadImages(allGames.slice(0, 24));
                     updateCategories(categoriesFromGames(allGames));
                     refreshGames();
