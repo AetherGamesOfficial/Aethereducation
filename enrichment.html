@@ -550,6 +550,67 @@
             background: rgba(255, 255, 255, 0.12) !important;
         }
 
+        .game-player {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.74);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .game-player.active {
+            display: flex;
+        }
+
+        .game-player-bar {
+            min-height: 72px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 5px solid #fff;
+        }
+
+        .game-player-title {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1.05rem;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+        }
+
+        .game-player-close {
+            min-width: 120px;
+            padding: 14px 22px;
+            border: 5px solid #fff;
+            border-radius: 20px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .game-player-frame {
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            border: 0;
+            background: #000;
+        }
+
     </style>
 </head>
 <body>
@@ -611,6 +672,15 @@
 
         <div class="status" id="status">Loading games...</div>
         <section class="games-grid" id="games"></section>
+
+    <section class="game-player" id="game-player" aria-hidden="true">
+        <div class="game-player-bar">
+            <span class="game-player-title" id="game-player-title">Game</span>
+            <button class="game-player-close" id="game-player-close" type="button">Close</button>
+        </div>
+        <iframe class="game-player-frame" id="game-player-frame" title="Aether game player" allow="autoplay; fullscreen; pointer-lock; gamepad" allowfullscreen></iframe>
+    </section>
+
     </main>
 
     <script>
@@ -619,6 +689,48 @@
         const searchInput = document.getElementById("game-search");
         const categoryFilter = document.getElementById("category-filter");
         const randomButton = document.getElementById("random-games");
+        const gamePlayer = document.getElementById("game-player");
+        const gamePlayerFrame = document.getElementById("game-player-frame");
+        const gamePlayerTitle = document.getElementById("game-player-title");
+        const gamePlayerClose = document.getElementById("game-player-close");
+        let activeGameObjectUrl = "";
+
+        function openGamePlayer(title, url, objectUrl = "") {
+            if (!url) {
+                setStatus("Could not open game.");
+                return;
+            }
+
+            if (activeGameObjectUrl) {
+                URL.revokeObjectURL(activeGameObjectUrl);
+                activeGameObjectUrl = "";
+            }
+
+            activeGameObjectUrl = objectUrl;
+            gamePlayerTitle.textContent = title || "Game";
+            gamePlayerFrame.src = url;
+            gamePlayer.classList.add("active");
+            gamePlayer.setAttribute("aria-hidden", "false");
+        }
+
+        function closeGamePlayer() {
+            gamePlayer.classList.remove("active");
+            gamePlayer.setAttribute("aria-hidden", "true");
+            gamePlayerFrame.src = "about:blank";
+
+            if (activeGameObjectUrl) {
+                URL.revokeObjectURL(activeGameObjectUrl);
+                activeGameObjectUrl = "";
+            }
+        }
+
+        gamePlayerClose.addEventListener("click", closeGamePlayer);
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && gamePlayer.classList.contains("active")) {
+                closeGamePlayer();
+            }
+        });
+
 
         let allGames = [];
         let imageUrls = {};
@@ -991,32 +1103,30 @@
             });
         }
 
-        function playGame(game) {
+
+        async function playGame(game) {
             if (game.html_url) {
-                openHtmlGame(game);
+                await openHtmlGame(game);
                 return;
             }
 
             if (game.url) {
-                try {
-                    sessionStorage.setItem("aether-tool-target", game.url);
-                } catch {}
-                window.location.href = `research.html?goto=${encodeURIComponent(game.url)}`;
+                openGamePlayer(game.name, game.url);
+                setStatus("");
                 return;
             }
 
-            Lumin.loadGame(game.id).catch(async () => {
-                try {
-                    const result = await Lumin.getGameUrl(game.id);
-                    const url = result?.url || result;
-                    if (url) {
-                        window.location.href = `research.html?goto=${encodeURIComponent(url)}`;
-                    }
-                } catch (err) {
-                    console.error("Game launch failed:", err);
-                    setStatus("Could not open game.");
-                }
-            });
+            try {
+                setStatus(`Opening ${game.name}...`);
+                const result = await Lumin.getGameUrl(game.id);
+                const url = result?.url || result;
+                if (!url) throw new Error("No playable URL returned.");
+                openGamePlayer(game.name, url);
+                setStatus("");
+            } catch (err) {
+                console.error("Game launch failed:", err);
+                setStatus("Could not open game.");
+            }
         }
 
         async function openHtmlGame(game) {
@@ -1036,10 +1146,13 @@
                 }
 
                 const blob = new Blob([html], { type: "text/html" });
-                window.location.href = URL.createObjectURL(blob);
+                const gameUrl = URL.createObjectURL(blob);
+                openGamePlayer(game.name, gameUrl, gameUrl);
+                setStatus("");
             } catch (err) {
-                console.error("GN Math game launch failed:", err);
-                window.location.href = `research.html?goto=${encodeURIComponent(game.html_url)}`;
+                console.error("HTML game launch failed:", err);
+                openGamePlayer(game.name, game.html_url);
+                setStatus("");
             }
         }
 
